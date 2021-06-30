@@ -1,0 +1,30 @@
+package {{SHORT_NAME}}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+//                                                                                    //
+//                         Copyright (c) 2021 ESSENTIAL KAOS                          //
+//      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
+//                                                                                    //
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+import (
+  "testing"
+
+  . "pkg.re/essentialkaos/check.v1"
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+func Test(t *testing.T) { TestingT(t) }
+
+type {{SHORT_NAME_TITLE}}Suite struct{}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+var _ = Suite(&{{SHORT_NAME_TITLE}}Suite{})
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+func (s *{{SHORT_NAME_TITLE}}Suite) TestSomething(c *C) {
+  // TEST YOUR STUFF HERE
+}
