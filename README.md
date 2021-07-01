@@ -24,16 +24,6 @@ To install the `scratch` from sources, make sure you have a working Go 1.15+ wor
 go install github.com/essentialkaos/scratch
 ```
 
-#### Prebuilt binaries
-
-You can download prebuilt binaries for Linux from [EK Apps Repository](https://apps.kaos.st/scratch/latest).
-
-To install the latest prebuilt version, do:
-
-```bash
-bash <(curl -fsSL https://apps.kaos.st/get) scratch
-```
-
 ### Command-line completion
 
 You can generate completion for `bash`, `zsh` or `fish` shell.
