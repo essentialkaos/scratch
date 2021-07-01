@@ -278,11 +278,11 @@ func genCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "scratch"))
+		fmt.Printf(bash.Generate(info, APP))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "scratch"))
+		fmt.Printf(fish.Generate(info, APP))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "scratch"))
+		fmt.Printf(zsh.Generate(info, optMap, APP))
 	default:
 		return 1
 	}
@@ -325,7 +325,7 @@ func genAbout() *usage.About {
 		Year:          2006,
 		Owner:         "ESSENTIAL KAOS",
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
-		UpdateChecker: usage.UpdateChecker{"essentialkaos/scratch", update.GitHubChecker},
+		UpdateChecker: usage.UpdateChecker{"essentialkaos/" + APP, update.GitHubChecker},
 	}
 }
 
