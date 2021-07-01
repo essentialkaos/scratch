@@ -1,0 +1,11 @@
+[Unit]
+Description={{DESC}}
+After=network.target
+
+[Service]
+PIDFile=/var/run/{{SHORT_NAME}}/{{SHORT_NAME}}.pid
+ExecStart=/etc/init.d/{{SHORT_NAME}} start
+ExecStop=/etc/init.d/{{SHORT_NAME}} stop
+
+[Install]
+WantedBy=multi-user.target
