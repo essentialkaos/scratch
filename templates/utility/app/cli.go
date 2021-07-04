@@ -65,6 +65,8 @@ func Init() {
 		os.Exit(1)
 	}
 
+	configureUI()
+
 	if options.Has(OPT_COMPLETION) {
 		os.Exit(genCompletion())
 	}
@@ -81,7 +83,6 @@ func Init() {
 		os.Exit(showUsage())
 	}
 
-	configureUI()
 	process(args)
 }
 
