@@ -78,6 +78,8 @@ func Init() {
 		os.Exit(1)
 	}
 
+	configureUI()
+
 	if options.GetB(OPT_VERSION) {
 		os.Exit(showAbout())
 	}
@@ -96,6 +98,13 @@ func Init() {
 	log.Aux("%s %s starting…", APP, VER)
 
 	start()
+}
+
+// configureUI configures user interface
+func configureUI() {
+	if options.GetB(OPT_NO_COLOR) {
+		fmtc.DisableColors = true
+	}
 }
 
 // loadConfig reads and parses configuration file

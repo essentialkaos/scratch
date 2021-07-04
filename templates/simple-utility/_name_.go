@@ -1,4 +1,4 @@
-package app
+package main
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -53,8 +53,8 @@ var optMap = options.Map{
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Init is main function
-func Init() {
+// main is main function
+func main() {
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
