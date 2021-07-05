@@ -60,9 +60,9 @@ Usage: scratch {options} template dir
 
 Options
 
-  --no-color, -nc .. Disable colors in output
-  --help, -h ....... Show this help message
-  --version, -v .... Show version
+  --no-color, -nc    Disable colors in output
+  --help, -h         Show this help message
+  --version, -v      Show version
 
 Examples
 
@@ -71,7 +71,6 @@ Examples
 
   scratch service $GOPATH/src/github.com/essentialkaos/myapp
   Generate service blank files in sources directory
-
 ```
 
 ### Contributing
