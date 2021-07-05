@@ -175,7 +175,7 @@ func genAbout() *usage.About {
 		App:           APP,
 		Version:       VER,
 		Desc:          DESC,
-		Year:          2006,
+		Year:          2009,
 		Owner:         "ESSENTIAL KAOS",
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
