@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"pkg.re/essentialkaos/ek.v12/fmtc"
 	"pkg.re/essentialkaos/ek.v12/options"
@@ -51,6 +52,9 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
+// useRawOutput is raw output flag (for cli command)
+var useRawOutput = false
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // main is main function
@@ -65,7 +69,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	configureUI()
+	preConfigureUI()
 
 	if options.Has(OPT_COMPLETION) {
 		os.Exit(genCompletion())
@@ -74,6 +78,8 @@ func main() {
 	if options.Has(OPT_GENERATE_MAN) {
 		os.Exit(genMan())
 	}
+
+	configureUI()
 
 	if options.GetB(OPT_VER) {
 		os.Exit(showAbout())
@@ -84,6 +90,31 @@ func main() {
 	}
 
 	process(args)
+}
+
+// preConfigureUI preconfigures UI based on information about user terminal
+func preConfigureUI() {
+	term := os.Getenv("TERM")
+
+	fmtc.DisableColors = true
+
+	if term != "" {
+		switch {
+		case strings.Contains(term, "xterm"),
+			strings.Contains(term, "color"),
+			term == "screen":
+			fmtc.DisableColors = false
+		}
+	}
+
+	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+		fmtc.DisableColors = true
+		useRawOutput = true
+	}
+
+	if os.Getenv("NO_COLOR") != "" {
+		fmtc.DisableColors = true
+	}
 }
 
 // configureUI configures user interface
