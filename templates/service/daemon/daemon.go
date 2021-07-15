@@ -26,7 +26,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Basic application info
+// Basic service info
 const (
 	APP  = "{{NAME}}"
 	VER  = "{{VERSION}}"
@@ -57,7 +57,7 @@ const (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Options map
+// optMap contains information about all supported options
 var optMap = options.Map{
 	OPT_CONFIG:   {Value: "/etc/{{SHORT_NAME}}.knf"},
 	OPT_NO_COLOR: {Type: options.BOOL},
@@ -222,6 +222,7 @@ func shutdown(code int) {
 func showUsage() int {
 	info := usage.NewInfo()
 
+	info.AddOption(OPT_CONFIG, "Path to configuration file", "config")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VERSION, "Show version")
