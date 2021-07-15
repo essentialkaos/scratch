@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/sortutil"
 	"pkg.re/essentialkaos/ek.v12/timeutil"
 )
 
@@ -135,6 +136,8 @@ func getTemplates() ([]*Template, error) {
 	if len(templates) == 0 {
 		return result, nil
 	}
+
+	sortutil.StringsNatural(templates)
 
 	for _, templateName := range templates {
 		template, err := getTemplate(templateName)
