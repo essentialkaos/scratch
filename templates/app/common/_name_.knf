@@ -1,0 +1,15 @@
+# This is configuration file for {{SHORT_NAME}}
+
+[log]
+
+  # Log file dir
+  dir: /var/log/{{SHORT_NAME}}
+
+  # Path to log file
+  file: {log:dir}/{{SHORT_NAME}}.log
+
+  # Log permissions
+  perms: 600
+
+  # Default log level (debug/info/warn/error/crit)
+  level: info
