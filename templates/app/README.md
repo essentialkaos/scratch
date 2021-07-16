@@ -8,11 +8,11 @@
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
-`{{SHORT_NAME}}` is a utility for XXXXXXXX.
+`{{SHORT_NAME}}` is an app for XXXXXXXX.
 
 ### Installation
 
@@ -24,39 +24,11 @@ To build the `{{SHORT_NAME}}` from scratch, make sure you have a working Go 1.15
 go install github.com/essentialkaos/{{SHORT_NAME}}
 ```
 
-#### Prebuilt binaries
-
-You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/{{SHORT_NAME}}/latest):
+#### From [ESSENTIAL KAOS Public Repository](https://yum.kaos.st)
 
 ```bash
-bash <(curl -fsSL https://apps.kaos.st/get) {{SHORT_NAME}}
-```
-
-### Command-line completion
-
-You can generate completion for `bash`, `zsh` or `fish` shell.
-
-Bash:
-```bash
-sudo {{SHORT_NAME}} --completion=bash 1> /etc/bash_completion.d/{{SHORT_NAME}}
-```
-
-ZSH:
-```bash
-sudo {{SHORT_NAME}} --completion=zsh 1> /usr/share/zsh/site-functions/{{SHORT_NAME}}
-```
-
-Fish:
-```bash
-sudo {{SHORT_NAME}} --completion=fish 1> /usr/share/fish/vendor_completions.d/{{SHORT_NAME}}.fish
-```
-
-### Man documentation
-
-You can generate man page using next command:
-
-```bash
-{{SHORT_NAME}} --generate-man | sudo gzip > /usr/share/man/man1/{{SHORT_NAME}}.1.gz
+sudo yum install -y https://yum.kaos.st/get/$(uname -r).rpm
+sudo yum install {{SHORT_NAME}}
 ```
 
 ### Usage
