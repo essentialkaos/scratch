@@ -13,6 +13,9 @@ import (
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v12/fmtc"
+	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/knf"
+	"pkg.re/essentialkaos/ek.v12/log"
 	"pkg.re/essentialkaos/ek.v12/options"
 	"pkg.re/essentialkaos/ek.v12/usage"
 	"pkg.re/essentialkaos/ek.v12/usage/completion/bash"
@@ -20,11 +23,14 @@ import (
 	"pkg.re/essentialkaos/ek.v12/usage/completion/zsh"
 	"pkg.re/essentialkaos/ek.v12/usage/man"
 	"pkg.re/essentialkaos/ek.v12/usage/update"
+
+	knfv "pkg.re/essentialkaos/ek.v12/knf/validators"
+	knff "pkg.re/essentialkaos/ek.v12/knf/validators/fs"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Basic utility info
+// Basic application info
 const (
 	APP  = "{{NAME}}"
 	VER  = "{{VERSION}}"
@@ -35,6 +41,7 @@ const (
 
 // Options
 const (
+	OPT_CONFIG   = "c:config"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
@@ -43,10 +50,19 @@ const (
 	OPT_GENERATE_MAN = "generate-man"
 )
 
+// Configuration file properties
+const (
+	LOG_DIR   = "log:dir"
+	LOG_FILE  = "log:file"
+	LOG_PERMS = "log:perms"
+	LOG_LEVEL = "log:level"
+)
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // optMap contains information about all supported options
 var optMap = options.Map{
+	OPT_CONFIG:   {Value: "/etc/{{SHORT_NAME}}.knf"},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
@@ -92,6 +108,10 @@ func Init() {
 		os.Exit(showUsage())
 	}
 
+	loadConfig()
+	validateConfig()
+	setupLogger()
+
 	process(args)
 }
 
@@ -124,6 +144,50 @@ func preConfigureUI() {
 func configureUI() {
 	if options.GetB(OPT_NO_COLOR) {
 		fmtc.DisableColors = true
+	}
+}
+
+// loadConfig reads and parses configuration file
+func loadConfig() {
+	err := knf.Global(options.GetS(OPT_CONFIG))
+
+	if err != nil {
+		printErrorAndExit(err.Error())
+	}
+}
+
+// validateConfig validates configuration file values
+func validateConfig() {
+	errs := knf.Validate([]*knf.Validator{
+		{LOG_DIR, knff.Perms, "DW"},
+		{LOG_DIR, knff.Perms, "DX"},
+
+		{LOG_LEVEL, knfv.NotContains, []string{"debug", "info", "warn", "error", "crit"}},
+	})
+
+	if len(errs) != 0 {
+		printError("Error while configuration file validation:")
+
+		for _, err := range errs {
+			printError("  %v", err)
+		}
+
+		os.Exit(1)
+	}
+}
+
+// setupLogger confugures logger subsystems
+func setupLogger() {
+	err := log.Set(knf.GetS(LOG_FILE), knf.GetM(LOG_PERMS, 644))
+
+	if err != nil {
+		printErrorAndExit(err.Error())
+	}
+
+	err = log.MinLevel(knf.GetS(LOG_LEVEL))
+
+	if err != nil {
+		printErrorAndExit(err.Error())
 	}
 }
 
@@ -196,6 +260,7 @@ func genMan() int {
 func genUsage() *usage.Info {
 	info := usage.NewInfo()
 
+	info.AddOption(OPT_CONFIG, "Path to configuration file", "config")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")

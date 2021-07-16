@@ -24,6 +24,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Basic utility info
 const (
 	APP  = "{{NAME}}"
 	VER  = "{{VERSION}}"
@@ -32,6 +33,7 @@ const (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Options
 const (
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
@@ -43,6 +45,7 @@ const (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// optMap contains information about all supported options
 var optMap = options.Map{
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
