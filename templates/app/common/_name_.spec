@@ -95,6 +95,7 @@ install -dm 755 %{buildroot}%{_bindir}
 install -dm 755 %{buildroot}%{_sysconfdir}
 install -dm 755 %{buildroot}%{_sysconfdir}/logrotate.d
 install -dm 755 %{buildroot}%{_logdir}/%{name}
+install -dm 755 %{buildroot}%{_mandir}/man1
 
 install -pm 755 %{srcdir}/%{name} \
                 %{buildroot}%{_bindir}/
@@ -105,6 +106,39 @@ install -pm 644 %{srcdir}/common/%{name}.knf \
 install -pm 644 %{srcdir}/common/%{name}.logrotate \
                 %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 
+# Generate actual man page
+pushd %{srcdir}
+  ./%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
+popd
+
+%post
+if [[ -d %{_sysconfdir}/bash_completion.d ]] ; then
+  %{name} --completion=bash 1> %{_sysconfdir}/bash_completion.d/%{name} 2>/dev/null
+fi
+
+if [[ -d %{_datarootdir}/fish/vendor_completions.d ]] ; then
+  %{name} --completion=fish 1> %{_datarootdir}/fish/vendor_completions.d/%{name}.fish 2>/dev/null
+fi
+
+if [[ -d %{_datadir}/zsh/site-functions ]] ; then
+  %{name} --completion=zsh 1> %{_datadir}/zsh/site-functions/_%{name} 2>/dev/null
+fi
+
+%postun
+if [[ $1 == 0 ]] ; then
+  if [[ -f %{_sysconfdir}/bash_completion.d/%{name} ]] ; then
+    rm -f %{_sysconfdir}/bash_completion.d/%{name} &>/dev/null || :
+  fi
+
+  if [[ -f %{_datarootdir}/fish/vendor_completions.d/%{name}.fish ]] ; then
+    rm -f %{_datarootdir}/fish/vendor_completions.d/%{name}.fish &>/dev/null || :
+  fi
+
+  if [[ -f %{_datadir}/zsh/site-functions/_%{name} ]] ; then
+    rm -f %{_datadir}/zsh/site-functions/_%{name} &>/dev/null || :
+  fi
+fi
+
 %clean
 rm -rf %{buildroot}
 
@@ -113,9 +147,10 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc LICENSE
-%attr(-,%{name},%{name}) %dir %{_logdir}/%{name}
+%dir %{_logdir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}.knf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
+%{_mandir}/man1/%{name}.1.*
 %{_bindir}/%{name}
 
 ################################################################################
