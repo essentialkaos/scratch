@@ -95,6 +95,7 @@ install -dm 755 %{buildroot}%{_bindir}
 install -dm 755 %{buildroot}%{_sysconfdir}
 install -dm 755 %{buildroot}%{_sysconfdir}/logrotate.d
 install -dm 755 %{buildroot}%{_logdir}/%{name}
+install -dm 755 %{buildroot}%{_mandir}/man1
 
 install -pm 755 %{srcdir}/%{name} \
                 %{buildroot}%{_bindir}/
@@ -104,6 +105,9 @@ install -pm 644 %{srcdir}/common/%{name}.knf \
 
 install -pm 644 %{srcdir}/common/%{name}.logrotate \
                 %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
+
+# Generate actual man page
+./%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
 
 %post
 if [[ -d %{_sysconfdir}/bash_completion.d ]] ; then
@@ -144,6 +148,7 @@ rm -rf %{buildroot}
 %dir %{_logdir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}.knf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
+%{_mandir}/man1/%{name}.1.*
 %{_bindir}/%{name}
 
 ################################################################################
