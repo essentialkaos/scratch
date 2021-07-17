@@ -107,7 +107,9 @@ install -pm 644 %{srcdir}/common/%{name}.logrotate \
                 %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 
 # Generate actual man page
-./%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
+pushd %{srcdir}
+  ./%{name} --generate-man > %{buildroot}%{_mandir}/man1/%{name}.1
+popd
 
 %post
 if [[ -d %{_sysconfdir}/bash_completion.d ]] ; then
