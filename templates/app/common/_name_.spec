@@ -113,7 +113,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc LICENSE
-%attr(-,%{name},%{name}) %dir %{_logdir}/%{name}
+%dir %{_logdir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}.knf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_bindir}/%{name}
