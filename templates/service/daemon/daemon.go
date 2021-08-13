@@ -18,7 +18,6 @@ import (
 	"pkg.re/essentialkaos/ek.v12/pid"
 	"pkg.re/essentialkaos/ek.v12/signal"
 	"pkg.re/essentialkaos/ek.v12/usage"
-	"pkg.re/essentialkaos/ek.v12/usage/update"
 
 	knfv "pkg.re/essentialkaos/ek.v12/knf/validators"
 	knff "pkg.re/essentialkaos/ek.v12/knf/validators/fs"
@@ -235,13 +234,12 @@ func showUsage() int {
 // showAbout prints info about version
 func showAbout() int {
 	usage := &usage.About{
-		App:           APP,
-		Version:       VER,
-		Desc:          DESC,
-		Year:          2009,
-		Owner:         "ESSENTIAL KAOS",
-		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
-		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
+		App:     APP,
+		Version: VER,
+		Desc:    DESC,
+		Year:    2009,
+		Owner:   "ESSENTIAL KAOS",
+		License: "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 	}
 
 	usage.Render()
