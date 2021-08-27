@@ -17,7 +17,7 @@ RUN apk add --no-cache git=~2.32 make=4.3-r0 upx=3.96-r1 && \
 
 FROM essentialkaos/alpine:3.13
 
-LABEL name="{{VAR_NAME}} Image" \
+LABEL name="{{NAME}} Image" \
       vendor="ESSENTIAL KAOS" \
       maintainer="Anton Novojilov" \
       license="Apache-2.0" \

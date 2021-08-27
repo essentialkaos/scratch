@@ -145,7 +145,7 @@ func getTemplates() ([]*Template, error) {
 		template, err := getTemplate(templateName)
 
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Problem with template \"%s\": %w", templateName, err)
 		}
 
 		result = append(result, template)
