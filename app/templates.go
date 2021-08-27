@@ -74,7 +74,7 @@ var knownVars = &VariableInfoStore{
 		VAR_SHORT_NAME_LOWER:    {"Short name in lower case", ``, true},
 		VAR_SHORT_NAME_UPPER:    {"Short name in upper case", ``, true},
 		VAR_SPEC_CHANGELOG_DATE: {"Date in spec changelog", ``, true},
-		DOCKER_CHANGE_DATE:      {"Date in Dockerfile", ``, true},
+		VAR_DOCKER_CHANGE_DATE:  {"Date in Dockerfile", ``, true},
 	},
 
 	// List contains variables which requires user input
