@@ -31,7 +31,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.5"
+	VER  = "0.0.6"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
