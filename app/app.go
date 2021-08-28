@@ -275,7 +275,11 @@ func checkTargetDir(dir string) error {
 		return err
 	}
 
-	if len(fsutil.ListAll(dir, false)) != 0 {
+	objects := fsutil.List(dir, false, fsutil.ListingFilter{
+		NotMatchPatterns: []string{".git", ".github", "README.md", "LICENSE"},
+	})
+
+	if len(objects) != 0 {
 		return fmt.Errorf("Target directory is not empty!")
 	}
 

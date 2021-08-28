@@ -260,7 +260,7 @@ func copyTemplateFile(sourceFile, targetFile string, vars Variables) error {
 
 	defer sfd.Close()
 
-	tfd, err := os.OpenFile(targetFile, os.O_CREATE|os.O_WRONLY, 0644)
+	tfd, err := os.OpenFile(targetFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 
 	if err != nil {
 		return err
