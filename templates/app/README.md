@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://kaos.sh/w/{{SHORT_NAME}}/ci"><img src="https://kaos.sh/w/{{SHORT_NAME}}/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/{{SHORT_NAME}}"><img src="https://kaos.sh/r/{{SHORT_NAME}}.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/b/{{SHORT_NAME}}"><img src="https://kaos.sh/b/XXXXXXXX.svg" alt="Codebeat badge" /></a>
+  <a href="https://kaos.sh/b/{{SHORT_NAME}}"><img src="https://kaos.sh/b/{{CODEBEAT_UUID}}.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/{{SHORT_NAME}}/codeql"><img src="https://kaos.sh/w/{{SHORT_NAME}}/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
@@ -12,7 +12,7 @@
 
 <br/>
 
-`{{SHORT_NAME}}` is an app for XXXXXXXX.
+`{{SHORT_NAME}}` is {{DESC_README}}.
 
 ### Installation
 
