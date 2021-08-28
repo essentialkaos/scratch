@@ -26,15 +26,18 @@ import (
 const SRC_DIR = "github.com/essentialkaos/scratch"
 
 const (
-	VAR_NAME                = "NAME"
-	VAR_SHORT_NAME          = "SHORT_NAME"
-	VAR_VERSION             = "VERSION"
-	VAR_DESC                = "DESC"
+	VAR_NAME        = "NAME"
+	VAR_SHORT_NAME  = "SHORT_NAME"
+	VAR_VERSION     = "VERSION"
+	VAR_DESC        = "DESC"
+	VAR_DESC_README = "DESC_README"
+
+	VAR_CODEBEAT_UUID = "CODEBEAT_UUID"
+
 	VAR_SHORT_NAME_TITLE    = "SHORT_NAME_TITLE"
 	VAR_SHORT_NAME_LOWER    = "SHORT_NAME_LOWER"
 	VAR_SHORT_NAME_UPPER    = "SHORT_NAME_UPPER"
 	VAR_SPEC_CHANGELOG_DATE = "SPEC_CHANGELOG_DATE"
-	VAR_DOCKER_CHANGE_DATE  = "DOCKER_CHANGE_DATE"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -65,24 +68,28 @@ type VariableInfo struct {
 var knownVars = &VariableInfoStore{
 	// Info contains info about all supported variables
 	Info: map[string]VariableInfo{
-		VAR_NAME:       {"Name", `^[a-zA-Z0-9\_\-]{2,32}$`, false},
-		VAR_SHORT_NAME: {"Short name (binary name or repository name)", `^[a-z0-9\_\-]{2,32}$`, false},
-		VAR_VERSION:    {"Version (in semver notation)", `^[0-9]+\.[0-9]*\.?[0-9]*$`, false},
-		VAR_DESC:       {"Description", ``, false},
+		VAR_NAME:        {"Name", `^[a-zA-Z0-9\_\-]{2,32}$`, false},
+		VAR_SHORT_NAME:  {"Short name (binary name or repository name)", `^[a-z0-9\_\-]{2,32}$`, false},
+		VAR_VERSION:     {"Version (in semver notation)", `^[0-9]+\.[0-9]*\.?[0-9]*$`, false},
+		VAR_DESC:        {"Description", `^.{16,128}$`, false},
+		VAR_DESC_README: {"Description for README file (part after 'app is… ')", `^.{16,128}$`, false},
+
+		VAR_CODEBEAT_UUID: {"Codebeat project UUID", ``, false},
 
 		VAR_SHORT_NAME_TITLE:    {"Short name in title case", ``, true},
 		VAR_SHORT_NAME_LOWER:    {"Short name in lower case", ``, true},
 		VAR_SHORT_NAME_UPPER:    {"Short name in upper case", ``, true},
 		VAR_SPEC_CHANGELOG_DATE: {"Date in spec changelog", ``, true},
-		VAR_DOCKER_CHANGE_DATE:  {"Date in Dockerfile", ``, true},
 	},
 
-	// List contains variables which requires user input
+	// List contains variables which requires user input in particular order
 	List: []string{
 		VAR_NAME,
 		VAR_SHORT_NAME,
 		VAR_VERSION,
 		VAR_DESC,
+		VAR_DESC_README,
+		VAR_CODEBEAT_UUID,
 	},
 }
 
@@ -346,6 +353,7 @@ func scanFileForVariables(file string) ([]string, error) {
 	return result, nil
 }
 
+// applyDynamicVariables generates values for dynamic variables
 func applyDynamicVariables(vars Variables) {
 	for v := range vars {
 		switch v {
