@@ -251,7 +251,7 @@ func printVariablesInfo(vars Variables) {
 			continue
 		}
 
-		fmtc.Printf("  {*}%-12s{!} %s\n", v+":", vars[v])
+		fmtc.Printf("  {*}%-16s{!} %s\n", v+":", vars[v])
 	}
 
 	fmtutil.Separator(false)
