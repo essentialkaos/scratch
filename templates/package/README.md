@@ -18,7 +18,7 @@
 
 ### Installation
 
-Make sure you have a working Go 1.15+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+Make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ````bash
 go get -d pkg.re/essentialkaos/{{SHORT_NAME}}.v1
