@@ -26,10 +26,14 @@ import (
 const SRC_DIR = "github.com/essentialkaos/scratch"
 
 const (
-	VAR_NAME                = "NAME"
-	VAR_SHORT_NAME          = "SHORT_NAME"
-	VAR_VERSION             = "VERSION"
-	VAR_DESC                = "DESC"
+	VAR_NAME        = "NAME"
+	VAR_SHORT_NAME  = "SHORT_NAME"
+	VAR_VERSION     = "VERSION"
+	VAR_DESC        = "DESC"
+	VAR_DESC_README = "DESC_README"
+
+	VAR_CODEBEAT_UUID = "CODEBEAT_UUID"
+
 	VAR_SHORT_NAME_TITLE    = "SHORT_NAME_TITLE"
 	VAR_SHORT_NAME_LOWER    = "SHORT_NAME_LOWER"
 	VAR_SHORT_NAME_UPPER    = "SHORT_NAME_UPPER"
@@ -64,10 +68,13 @@ type VariableInfo struct {
 var knownVars = &VariableInfoStore{
 	// Info contains info about all supported variables
 	Info: map[string]VariableInfo{
-		VAR_NAME:       {"Name", `^[a-zA-Z0-9\_\-]{2,32}$`, false},
-		VAR_SHORT_NAME: {"Short name (binary name or repository name)", `^[a-z0-9\_\-]{2,32}$`, false},
-		VAR_VERSION:    {"Version (in semver notation)", `^[0-9]+\.[0-9]*\.?[0-9]*$`, false},
-		VAR_DESC:       {"Description", ``, false},
+		VAR_NAME:        {"Name", `^[a-zA-Z0-9\_\-]{2,32}$`, false},
+		VAR_SHORT_NAME:  {"Short name (binary name or repository name)", `^[a-z0-9\_\-]{2,32}$`, false},
+		VAR_VERSION:     {"Version (in semver notation)", `^[0-9]+\.[0-9]*\.?[0-9]*$`, false},
+		VAR_DESC:        {"Description", `^.{16,128}$`, false},
+		VAR_DESC_README: {"Description for README file (part after 'app is… ')", `^.{16,128}$`, false},
+
+		VAR_CODEBEAT_UUID: {"Codebeat project UUID", ``, false},
 
 		VAR_SHORT_NAME_TITLE:    {"Short name in title case", ``, true},
 		VAR_SHORT_NAME_LOWER:    {"Short name in lower case", ``, true},
@@ -75,12 +82,14 @@ var knownVars = &VariableInfoStore{
 		VAR_SPEC_CHANGELOG_DATE: {"Date in spec changelog", ``, true},
 	},
 
-	// List contains variables which requires user input
+	// List contains variables which requires user input in particular order
 	List: []string{
 		VAR_NAME,
 		VAR_SHORT_NAME,
 		VAR_VERSION,
 		VAR_DESC,
+		VAR_DESC_README,
+		VAR_CODEBEAT_UUID,
 	},
 }
 
@@ -143,7 +152,7 @@ func getTemplates() ([]*Template, error) {
 		template, err := getTemplate(templateName)
 
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Problem with template \"%s\": %w", templateName, err)
 		}
 
 		result = append(result, template)
@@ -251,7 +260,7 @@ func copyTemplateFile(sourceFile, targetFile string, vars Variables) error {
 
 	defer sfd.Close()
 
-	tfd, err := os.OpenFile(targetFile, os.O_CREATE|os.O_WRONLY, 0644)
+	tfd, err := os.OpenFile(targetFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 
 	if err != nil {
 		return err
@@ -344,6 +353,7 @@ func scanFileForVariables(file string) ([]string, error) {
 	return result, nil
 }
 
+// applyDynamicVariables generates values for dynamic variables
 func applyDynamicVariables(vars Variables) {
 	for v := range vars {
 		switch v {

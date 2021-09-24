@@ -5,7 +5,7 @@
   <a href="https://kaos.sh/w/go-{{SHORT_NAME}}/ci"><img src="https://kaos.sh/w/go-{{SHORT_NAME}}/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/go-{{SHORT_NAME}}"><img src="https://kaos.sh/r/go-{{SHORT_NAME}}.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/c/go-{{SHORT_NAME}}"><img src="https://kaos.sh/c/go-{{SHORT_NAME}}.svg" alt="Coverage Status" /></a>
-  <a href="https://kaos.sh/b/go-{{SHORT_NAME}}"><img src="https://kaos.sh/b/XXXXXXXX.svg" alt="Codebeat badge" /></a>
+  <a href="https://kaos.sh/b/go-{{SHORT_NAME}}"><img src="https://kaos.sh/b/{{CODEBEAT_UUID}}.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/go-{{SHORT_NAME}}/codeql"><img src="https://kaos.sh/w/go-{{SHORT_NAME}}/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
@@ -14,11 +14,11 @@
 
 <br/>
 
-`{{SHORT_NAME}}` is a Go package for XXXXXXXX.
+`{{SHORT_NAME}}` is {{DESC_README}}.
 
 ### Installation
 
-Make sure you have a working Go 1.15+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+Make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ````bash
 go get -d pkg.re/essentialkaos/go-{{SHORT_NAME}}.v1

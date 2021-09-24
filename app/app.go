@@ -31,7 +31,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.5"
+	VER  = "0.0.6"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -251,7 +251,7 @@ func printVariablesInfo(vars Variables) {
 			continue
 		}
 
-		fmtc.Printf("  {*}%-12s{!} %s\n", v+":", vars[v])
+		fmtc.Printf("  {*}%-16s{!} %s\n", v+":", vars[v])
 	}
 
 	fmtutil.Separator(false)
@@ -275,7 +275,11 @@ func checkTargetDir(dir string) error {
 		return err
 	}
 
-	if len(fsutil.ListAll(dir, false)) != 0 {
+	objects := fsutil.List(dir, false, fsutil.ListingFilter{
+		NotMatchPatterns: []string{".git", ".github", "README.md", "LICENSE"},
+	})
+
+	if len(objects) != 0 {
 		return fmt.Errorf("Target directory is not empty!")
 	}
 
