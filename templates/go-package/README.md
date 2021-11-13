@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://kaos.sh/g/go-{{SHORT_NAME}}.v1"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev" /></a>
   <a href="https://kaos.sh/w/go-{{SHORT_NAME}}/ci"><img src="https://kaos.sh/w/go-{{SHORT_NAME}}/ci.svg" alt="GitHub Actions CI Status" /></a>
-  <a href="https://kaos.sh/r/go-{{SHORT_NAME}}"><img src="https://kaos.sh/r/go-{{SHORT_NAME}}.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/r/go-{{SHORT_NAME}}.v1"><img src="https://kaos.sh/r/go-{{SHORT_NAME}}.v1.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/c/go-{{SHORT_NAME}}"><img src="https://kaos.sh/c/go-{{SHORT_NAME}}.svg" alt="Coverage Status" /></a>
   <a href="https://kaos.sh/b/go-{{SHORT_NAME}}"><img src="https://kaos.sh/b/{{CODEBEAT_UUID}}.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/go-{{SHORT_NAME}}/codeql"><img src="https://kaos.sh/w/go-{{SHORT_NAME}}/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
