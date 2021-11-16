@@ -26,7 +26,7 @@ go install github.com/essentialkaos/{{SHORT_NAME}}
 
 #### Prebuilt binaries
 
-You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/{{SHORT_NAME}}/latest):
+You can download prebuilt binaries for Linux and macOS from [EK Apps Repository](https://apps.kaos.st/{{SHORT_NAME}}/latest):
 
 ```bash
 bash <(curl -fsSL https://apps.kaos.st/get) {{SHORT_NAME}}

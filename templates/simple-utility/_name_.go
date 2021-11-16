@@ -134,12 +134,20 @@ func process(args []string) {
 
 // printError prints error message to console
 func printError(f string, a ...interface{}) {
-	fmtc.Fprintf(os.Stderr, "{r}"+f+"{!}\n", a...)
+	if len(a) == 0 {
+		fmtc.Fprintln(os.Stderr, "{r}"+f+"{!}")
+	} else {
+		fmtc.Fprintf(os.Stderr, "{r}"+f+"{!}\n", a...)
+	}
 }
 
 // printError prints warning message to console
 func printWarn(f string, a ...interface{}) {
-	fmtc.Fprintf(os.Stderr, "{y}"+f+"{!}\n", a...)
+	if len(a) == 0 {
+		fmtc.Fprintln(os.Stderr, "{y}"+f+"{!}")
+	} else {
+		fmtc.Fprintf(os.Stderr, "{y}"+f+"{!}\n", a...)
+	}
 }
 
 // printErrorAndExit print error mesage and exit with exit code 1

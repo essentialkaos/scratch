@@ -31,7 +31,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.6"
+	VER  = "0.0.7"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -269,6 +269,10 @@ func printVariablesInfo(vars Variables) {
 
 // checkTargetDir checks target dir
 func checkTargetDir(dir string) error {
+	if !fsutil.IsExist(dir) {
+		return os.Mkdir(dir, 0755)
+	}
+
 	err := fsutil.ValidatePerms("DRWX", dir)
 
 	if err != nil {
