@@ -21,7 +21,7 @@
 Make sure you have a working Go 1.17+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ````bash
-go get github/essentialkaos/go-{{SHORT_NAME}}
+go get github.com/essentialkaos/go-{{SHORT_NAME}}
 ````
 
 ### CI Status
