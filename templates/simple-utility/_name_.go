@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -128,7 +129,7 @@ func configureUI() {
 }
 
 // process starts processing
-func process(args []string) {
+func process(args options.Arguments) {
 	// DO YOUR STUFF HERE
 }
 
