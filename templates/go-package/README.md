@@ -1,16 +1,16 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/go-{{SHORT_NAME}}.svg"/></a></p>
 
 <p align="center">
-  <a href="https://kaos.sh/g/go-{{SHORT_NAME}}.v1"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev" /></a>
+  <a href="https://kaos.sh/g/go-{{SHORT_NAME}}"><img src="https://gh.kaos.st/godoc.svg" alt="PkgGoDev" /></a>
   <a href="https://kaos.sh/w/go-{{SHORT_NAME}}/ci"><img src="https://kaos.sh/w/go-{{SHORT_NAME}}/ci.svg" alt="GitHub Actions CI Status" /></a>
-  <a href="https://kaos.sh/r/go-{{SHORT_NAME}}.v1"><img src="https://kaos.sh/r/go-{{SHORT_NAME}}.v1.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/r/go-{{SHORT_NAME}}"><img src="https://kaos.sh/r/go-{{SHORT_NAME}}.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/c/go-{{SHORT_NAME}}"><img src="https://kaos.sh/c/go-{{SHORT_NAME}}.svg" alt="Coverage Status" /></a>
   <a href="https://kaos.sh/b/go-{{SHORT_NAME}}"><img src="https://kaos.sh/b/{{CODEBEAT_UUID}}.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/go-{{SHORT_NAME}}/codeql"><img src="https://kaos.sh/w/go-{{SHORT_NAME}}/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#installation">Installation</a> • <a href="#build-status">Build Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#installation">Installation</a> • <a href="#ci-status">CI Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -18,19 +18,13 @@
 
 ### Installation
 
-Make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+Make sure you have a working Go 1.17+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ````bash
-go get -d pkg.re/essentialkaos/go-{{SHORT_NAME}}.v1
+go get github.com/essentialkaos/go-{{SHORT_NAME}}
 ````
 
-For update to latest stable release, do:
-
-```bash
-go get -d -u pkg.re/essentialkaos/go-{{SHORT_NAME}}.v1
-```
-
-### Build Status
+### CI Status
 
 | Branch | Status |
 |--------|----------|

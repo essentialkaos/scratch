@@ -31,7 +31,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.8"
+	VER  = "0.0.9"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -97,7 +97,10 @@ func Init() {
 	if len(args) < 2 {
 		listTemplates()
 	} else {
-		generateApp(args[0], args[1])
+		generateApp(
+			args.Get(0).String(),
+			args.Get(1).Clean().String(),
+		)
 	}
 }
 
@@ -144,7 +147,7 @@ func generateApp(templateName, dir string) {
 	}
 
 	if !hasTemplate(templateName) {
-		printErrorAndExit("There is no template with name \"%s\"", templateName)
+		printErrorAndExit("There is no template with name %q", templateName)
 	}
 
 	dir, _ = filepath.Abs(dir)
@@ -229,7 +232,7 @@ func readVariablesValues(vars Variables) error {
 			}
 
 			if !knownVars.Info[v].IsValid(value) {
-				terminal.PrintWarnMessage("\"%s\" is not a valid value for this variable\n", value)
+				terminal.PrintWarnMessage("%q is not a valid value for this variable\n", value)
 				continue
 			}
 

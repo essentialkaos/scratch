@@ -8,7 +8,7 @@
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -18,10 +18,10 @@
 
 #### From source
 
-To build the `{{SHORT_NAME}}` from scratch, make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `{{SHORT_NAME}}` from scratch, make sure you have a working Go 1.17+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
-go install github.com/essentialkaos/{{SHORT_NAME}}
+go install github.com/essentialkaos/{{SHORT_NAME}}@latest
 ```
 
 #### Prebuilt binaries
@@ -65,7 +65,7 @@ You can generate man page using next command:
 
 ```
 
-### Build Status
+### CI Status
 
 | Branch | Status |
 |--------|----------|
