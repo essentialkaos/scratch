@@ -21,6 +21,8 @@ import (
 
 	knfv "github.com/essentialkaos/ek/v12/knf/validators"
 	knff "github.com/essentialkaos/ek/v12/knf/validators/fs"
+
+	"github.com/essentialkaos/{{SHORT_NAME}}/daemon/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -37,7 +39,9 @@ const (
 	OPT_CONFIG   = "c:config"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
-	OPT_VERSION  = "v:version"
+	OPT_VER      = "v:version"
+
+	OPT_VERB_VER = "vv:verbose-version"
 )
 
 // Configuration file properties
@@ -61,12 +65,14 @@ var optMap = options.Map{
 	OPT_CONFIG:   {Value: "/etc/{{SHORT_NAME}}.knf"},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VERSION:  {Type: options.BOOL, Alias: "ver"},
+	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+
+	OPT_VERB_VER: {Type: options.BOOL},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func Init() {
+func Init(gitRev string, gomod []byte) {
 	_, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -79,12 +85,13 @@ func Init() {
 
 	configureUI()
 
-	if options.GetB(OPT_VERSION) {
-		os.Exit(showAbout())
-	}
-
-	if options.GetB(OPT_HELP) {
+	switch {
+	case options.GetB(OPT_VER):
+		os.Exit(showAbout(gitRev))
+	case options.GetB(OPT_HELP):
 		os.Exit(showUsage())
+	case options.GetB(OPT_VERB_VER):
+		os.Exit(support.Show(APP, VER, gitRev, gomod))
 	}
 
 	loadConfig()
@@ -97,6 +104,26 @@ func Init() {
 	log.Aux("%s %s starting…", APP, VER)
 
 	start()
+}
+
+// preConfigureUI preconfigures UI based on information about user terminal
+func preConfigureUI() {
+	term := os.Getenv("TERM")
+
+	fmtc.DisableColors = true
+
+	if term != "" {
+		switch {
+		case strings.Contains(term, "xterm"),
+			strings.Contains(term, "color"),
+			term == "screen":
+			fmtc.DisableColors = false
+		}
+	}
+
+	if os.Getenv("NO_COLOR") != "" {
+		fmtc.DisableColors = true
+	}
 }
 
 // configureUI configures user interface
@@ -227,21 +254,31 @@ func shutdown(code int) {
 
 // showUsage prints usage info
 func showUsage() int {
-	info := usage.NewInfo()
-
-	info.AddOption(OPT_CONFIG, "Path to configuration file", "config")
-	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
-	info.AddOption(OPT_HELP, "Show this help message")
-	info.AddOption(OPT_VERSION, "Show version")
-
-	info.Render()
-
+	genUsage().Render()
 	return 0
 }
 
 // showAbout prints info about version
-func showAbout() int {
-	usage := &usage.About{
+func showAbout(gitRev string) int {
+	genAbout(gitRev).Render()
+	return 0
+}
+
+// genUsage generates usage info
+func genUsage() *usage.Info {
+	info := usage.NewInfo()
+
+	info.AddOption(OPT_CONFIG, "Path to configuration file", "file")
+	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
+	info.AddOption(OPT_HELP, "Show this help message")
+	info.AddOption(OPT_VER, "Show version")
+
+	return info
+}
+
+// genAbout generates info about version
+func genAbout(gitRev string) *usage.About {
+	about := &usage.About{
 		App:     APP,
 		Version: VER,
 		Desc:    DESC,
@@ -250,7 +287,9 @@ func showAbout() int {
 		License: "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 	}
 
-	usage.Render()
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
+	}
 
-	return 0
+	return about
 }

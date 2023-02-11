@@ -1,11 +1,14 @@
 [Unit]
 Description={{DESC}}
-After=network.target
+Documentation=https://kaos.sh/{{SHORT_NAME}}
+After=network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
 
 [Service]
 PIDFile=/var/run/{{SHORT_NAME}}/{{SHORT_NAME}}.pid
 ExecStart=/etc/init.d/{{SHORT_NAME}} start
 ExecStop=/etc/init.d/{{SHORT_NAME}} stop
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target

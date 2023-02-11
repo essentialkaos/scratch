@@ -21,6 +21,8 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
 	"github.com/essentialkaos/ek/v12/usage/man"
 	"github.com/essentialkaos/ek/v12/usage/update"
+
+	"github.com/essentialkaos/{{SHORT_NAME}}/app/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -40,6 +42,7 @@ const (
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
 
+	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
 	OPT_GENERATE_MAN = "generate-man"
 )
@@ -52,6 +55,7 @@ var optMap = options.Map{
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
 
+	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
@@ -63,6 +67,8 @@ var useRawOutput = false
 
 // Init is main function
 func Init() {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -73,23 +79,18 @@ func Init() {
 		os.Exit(1)
 	}
 
-	preConfigureUI()
-
-	if options.Has(OPT_COMPLETION) {
-		os.Exit(genCompletion())
-	}
-
-	if options.Has(OPT_GENERATE_MAN) {
-		os.Exit(genMan())
-	}
-
 	configureUI()
 
-	if options.GetB(OPT_VER) {
-		os.Exit(showAbout())
-	}
-
-	if options.GetB(OPT_HELP) || len(args) == 0 {
+	switch {
+	case options.Has(OPT_COMPLETION):
+		os.Exit(genCompletion())
+	case options.Has(OPT_GENERATE_MAN):
+		os.Exit(genMan())
+	case options.GetB(OPT_VER):
+		os.Exit(showAbout(gitRev))
+	case options.GetB(OPT_VERB_VER):
+		os.Exit(support.Show(APP, VER, gitRev, gomod))
+	case options.GetB(OPT_HELP) || len(args) == 0:
 		os.Exit(showUsage())
 	}
 
@@ -166,8 +167,8 @@ func showUsage() int {
 }
 
 // showAbout prints info about version
-func showAbout() int {
-	genAbout().Render()
+func showAbout(gitRev string) int {
+	genAbout(gitRev).Render()
 	return 0
 }
 
@@ -194,7 +195,7 @@ func genMan() int {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
-			genAbout(),
+			genAbout(""),
 		),
 	)
 
@@ -213,8 +214,8 @@ func genUsage() *usage.Info {
 }
 
 // genAbout generates info about version
-func genAbout() *usage.About {
-	return &usage.About{
+func genAbout(gitRev string) *usage.About {
+	about := &usage.About{
 		App:           APP,
 		Version:       VER,
 		Desc:          DESC,
@@ -223,6 +224,12 @@ func genAbout() *usage.About {
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
 	}
+
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
+	}
+
+	return about
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

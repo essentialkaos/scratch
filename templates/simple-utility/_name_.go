@@ -59,10 +59,15 @@ var optMap = options.Map{
 // useRawOutput is raw output flag (for cli command)
 var useRawOutput = false
 
+// gitrev is short hash of the latest git commit
+var gitrev string
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // main is main function
 func main() {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -73,23 +78,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	preConfigureUI()
-
-	if options.Has(OPT_COMPLETION) {
-		os.Exit(genCompletion())
-	}
-
-	if options.Has(OPT_GENERATE_MAN) {
-		os.Exit(genMan())
-	}
-
 	configureUI()
 
-	if options.GetB(OPT_VER) {
-		os.Exit(showAbout())
-	}
-
-	if options.GetB(OPT_HELP) || len(args) == 0 {
+	switch {
+	case options.Has(OPT_COMPLETION):
+		os.Exit(genCompletion())
+	case options.Has(OPT_GENERATE_MAN):
+		os.Exit(genMan())
+	case options.GetB(OPT_VER):
+		os.Exit(showAbout(gitRev))
+	case options.GetB(OPT_HELP) || len(args) == 0:
 		os.Exit(showUsage())
 	}
 
@@ -166,8 +164,8 @@ func showUsage() int {
 }
 
 // showAbout prints info about version
-func showAbout() int {
-	genAbout().Render()
+func showAbout(gitRev string) int {
+	genAbout(gitRev).Render()
 	return 0
 }
 
@@ -194,7 +192,7 @@ func genMan() int {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
-			genAbout(),
+			genAbout(""),
 		),
 	)
 
@@ -213,7 +211,7 @@ func genUsage() *usage.Info {
 }
 
 // genAbout generates info about version
-func genAbout() *usage.About {
+func genAbout(gitRev string) *usage.About {
 	return &usage.About{
 		App:           APP,
 		Version:       VER,
