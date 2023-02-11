@@ -66,7 +66,7 @@ var useRawOutput = false
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Init is main function
-func Init() {
+func Init(gitRev string, gomod []byte) {
 	preConfigureUI()
 
 	args, errs := options.Parse(optMap)

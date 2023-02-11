@@ -31,7 +31,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.9"
+	VER  = "0.0.10"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -57,13 +57,12 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
-// useRawOutput is raw output flag (for cli command)
-var useRawOutput = false
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Init is main app func
 func Init() {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -74,23 +73,16 @@ func Init() {
 		os.Exit(1)
 	}
 
-	preConfigureUI()
-
-	if options.Has(OPT_COMPLETION) {
-		os.Exit(genCompletion())
-	}
-
-	if options.Has(OPT_GENERATE_MAN) {
-		os.Exit(genMan())
-	}
-
 	configureUI()
 
-	if options.GetB(OPT_VER) {
+	switch {
+	case options.Has(OPT_COMPLETION):
+		os.Exit(genCompletion())
+	case options.Has(OPT_GENERATE_MAN):
+		os.Exit(genMan())
+	case options.GetB(OPT_VER):
 		os.Exit(showAbout())
-	}
-
-	if options.GetB(OPT_HELP) {
+	case options.GetB(OPT_HELP) || len(args) == 0:
 		os.Exit(showUsage())
 	}
 
@@ -121,7 +113,6 @@ func preConfigureUI() {
 
 	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
 		fmtc.DisableColors = true
-		useRawOutput = true
 	}
 
 	if os.Getenv("NO_COLOR") != "" {
