@@ -14,10 +14,13 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fmtc/lscolors"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/pluralize"
+	"github.com/essentialkaos/ek/v12/sortutil"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -31,7 +34,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.10"
+	VER  = "0.1.0"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -82,13 +85,16 @@ func Init() {
 		os.Exit(genMan())
 	case options.GetB(OPT_VER):
 		os.Exit(showAbout())
-	case options.GetB(OPT_HELP) || len(args) == 0:
+	case options.GetB(OPT_HELP):
 		os.Exit(showUsage())
 	}
 
-	if len(args) < 2 {
+	switch len(args) {
+	case 0:
 		listTemplates()
-	} else {
+	case 1:
+		listTemplateData(args.Get(0).String())
+	default:
 		generateApp(
 			args.Get(0).String(),
 			args.Get(1).Clean().String(),
@@ -192,6 +198,43 @@ func listTemplates() {
 				t.Name, pluralize.P("%d %s", len(t.Data), "file", "files"),
 			)
 		}
+	}
+
+	fmtc.NewLine()
+}
+
+// listTemplateData show list of files in template
+func listTemplateData(name string) {
+	if !hasTemplate(name) {
+		printErrorAndExit("There is no templates with name \"%s\"", name)
+	}
+
+	t, err := getTemplate(name)
+
+	if err != nil {
+		printErrorAndExit(err.Error())
+	}
+
+	sortutil.StringsNatural(t.Data)
+
+	fmtc.Printf(
+		"\n {s-}┌{!} {*}%s{!} {s-}(%s){!}\n {s-}│{!}\n",
+		t.Name, pluralize.P("%d %s", len(t.Data), "file", "files"),
+	)
+
+	for i, file := range t.Data {
+		if i+1 != len(t.Data) {
+			fmtc.Printf(" {s-}├─{!}")
+		} else {
+			fmtc.Printf(" {s-}└─{!}")
+		}
+
+		fileSize := fsutil.GetSize(path.Join(t.Path, file))
+		fmtc.Printf(
+			" %s {s-}(%s){!}\n",
+			lscolors.ColorizePath(file),
+			fmtutil.PrettySize(fileSize),
+		)
 	}
 
 	fmtc.NewLine()
@@ -347,8 +390,15 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 
-	info.AddExample("package .", "Generate package blank files in current directory")
-	info.AddExample("service $GOPATH/src/github.com/essentialkaos/myapp", "Generate service blank files in sources directory")
+	info.AddExample("package", "List files in template \"package\"")
+	info.AddExample(
+		"package .",
+		"Generate files based on tempalte \"package\" in current directory",
+	)
+	info.AddExample(
+		"service $GOPATH/src/github.com/essentialkaos/myapp",
+		"Generate files based on tempalte \"service\" in given directory",
+	)
 
 	return info
 }

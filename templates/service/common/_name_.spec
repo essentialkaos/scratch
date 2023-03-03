@@ -28,7 +28,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  golang >= 1.19
 
-Requires:       kaosv >= 2.16
 Requires:       systemd
 
 Provides:       %{name} = %{version}-%{release}
@@ -60,7 +59,6 @@ rm -rf %{buildroot}
 
 install -dDm 755 %{buildroot}%{_bindir}
 install -dDm 755 %{buildroot}%{_sysconfdir}/logrotate.d
-install -dDm 755 %{buildroot}%{_initddir}
 install -dDm 755 %{buildroot}%{_unitdir}
 install -dDm 755 %{buildroot}%{_logdir}/%{name}
 
@@ -70,14 +68,11 @@ install -pm 755 %{name}/%{name} \
 install -pm 644 %{name}/common/%{name}.knf \
                 %{buildroot}%{_sysconfdir}/
 
-install -pm 755 %{name}/common/%{name}.init \
-                %{buildroot}%{_initddir}/%{name}
-
 install -pm 644 %{name}/common/%{name}.logrotate \
                 %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 
 install -pm 644 %{name}/common/%{name}.service \
-                 %{buildroot}%{_unitdir}/
+                %{buildroot}%{_unitdir}/
 
 %clean
 rm -rf %{buildroot}
@@ -96,7 +91,6 @@ exit 0
 %config(noreplace) %{_sysconfdir}/%{name}.knf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_unitdir}/%{name}.service
-%{_initddir}/%{name}
 %{_bindir}/%{name}
 
 ################################################################################

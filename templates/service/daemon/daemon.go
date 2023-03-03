@@ -15,7 +15,6 @@ import (
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/log"
 	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/pid"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/usage"
 
@@ -50,12 +49,6 @@ const (
 	LOG_FILE  = "log:file"
 	LOG_PERMS = "log:perms"
 	LOG_LEVEL = "log:level"
-)
-
-// Pid file info
-const (
-	PID_DIR  = "/var/run/{{SHORT_NAME}}"
-	PID_FILE = "{{SHORT_NAME}}.pid"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -98,7 +91,6 @@ func Init(gitRev string, gomod []byte) {
 	validateConfig()
 	registerSignalHandlers()
 	setupLogger()
-	createPidFile()
 
 	log.Aux(strings.Repeat("-", 80))
 	log.Aux("%s %s starting…", APP, VER)
@@ -186,17 +178,6 @@ func setupLogger() {
 	}
 }
 
-// createPidFile creates PID file
-func createPidFile() {
-	pid.Dir = PID_DIR
-
-	err := pid.Create(PID_FILE)
-
-	if err != nil {
-		printErrorAndExit(err.Error())
-	}
-}
-
 func start() {
 	// DO YOUR STUFF HERE
 }
@@ -246,7 +227,6 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // shutdown stops deamon
 func shutdown(code int) {
-	pid.Remove(PID_FILE)
 	os.Exit(code)
 }
 
