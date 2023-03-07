@@ -34,9 +34,9 @@ type Pkgs []Pkg
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Show prints verbose info about application, system, dependencies and
+// Print prints verbose info about application, system, dependencies and
 // important environment
-func Show(app, ver, gitRev string, gomod []byte) int {
+func Print(app, ver, gitRev string, gomod []byte) {
 	pkgs := collectEnvInfo()
 
 	fmtutil.SeparatorTitleColorTag = "{s-}"
@@ -50,8 +50,6 @@ func Show(app, ver, gitRev string, gomod []byte) int {
 	showDepsInfo(gomod)
 
 	fmtutil.Separator(false)
-
-	return 0
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

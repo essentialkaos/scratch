@@ -67,8 +67,8 @@ const (
 var optMap = options.Map{
 	OPT_CONFIG:   {Value: "/etc/{{SHORT_NAME}}.knf"},
 	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:     {Type: options.BOOL},
+	OPT_VER:      {Type: options.BOOL},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -80,17 +80,14 @@ var useRawOutput = false
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Init is main function
-func Init(gitRev string, gomod []byte) {
+// Run is main utility function
+func Run(gitRev string, gomod []byte) {
 	preConfigureUI()
 
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		for _, err := range errs {
-			printError(err.Error())
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
 	}
 
@@ -100,20 +97,32 @@ func Init(gitRev string, gomod []byte) {
 	case options.Has(OPT_COMPLETION):
 		os.Exit(genCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		genMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		os.Exit(showAbout(gitRev))
+		showAbout(gitRev)
+		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		os.Exit(support.Show(APP, VER, gitRev, gomod))
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		os.Exit(showUsage())
+		showUsage()
+		os.Exit(0)
 	}
 
-	loadConfig()
-	validateConfig()
-	setupLogger()
+	err := prepare()
 
-	process(args)
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
+
+	err = process(args)
+
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
 }
 
 // preConfigureUI preconfigures UI based on information about user terminal
@@ -148,17 +157,31 @@ func configureUI() {
 	}
 }
 
-// loadConfig reads and parses configuration file
-func loadConfig() {
+// prepare prepares application to run
+func prepare() error {
 	err := knf.Global(options.GetS(OPT_CONFIG))
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
+
+	err = validateConfig()
+
+	if err != nil {
+		return err
+	}
+
+	err = setupLogger()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // validateConfig validates configuration file values
-func validateConfig() {
+func validateConfig() error {
 	errs := knf.Validate([]*knf.Validator{
 		{LOG_DIR, knff.Perms, "DW"},
 		{LOG_DIR, knff.Perms, "DX"},
@@ -167,34 +190,32 @@ func validateConfig() {
 	})
 
 	if len(errs) != 0 {
-		printError("Error while configuration file validation:")
-
-		for _, err := range errs {
-			printError("  %v", err)
-		}
-
-		os.Exit(1)
+		return fmt.Errorf("Configuration file validation error: %w", errs[0])
 	}
+
+	return nil
 }
 
-// setupLogger confugures logger subsystems
-func setupLogger() {
+// setupLogger confugures logger subsystem
+func setupLogger() error {
 	err := log.Set(knf.GetS(LOG_FILE), knf.GetM(LOG_PERMS, 644))
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	err = log.MinLevel(knf.GetS(LOG_LEVEL))
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
+
+	return nil
 }
 
-// process starts processing
-func process(args options.Arguments) {
-	// DO YOUR STUFF HERE
+// process starts arguments processing
+func process(args options.Arguments) error {
+	return nil
 }
 
 // printError prints error message to console
@@ -215,24 +236,16 @@ func printWarn(f string, a ...interface{}) {
 	}
 }
 
-// printErrorAndExit print error mesage and exit with exit code 1
-func printErrorAndExit(f string, a ...interface{}) {
-	printError(f, a...)
-	os.Exit(1)
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // showUsage prints usage info
-func showUsage() int {
+func showUsage() {
 	genUsage().Render()
-	return 0
 }
 
 // showAbout prints info about version
-func showAbout(gitRev string) int {
+func showAbout(gitRev string) {
 	genAbout(gitRev).Render()
-	return 0
 }
 
 // genCompletion generates completion for different shells
@@ -254,15 +267,13 @@ func genCompletion() int {
 }
 
 // genMan generates man page
-func genMan() int {
+func genMan() {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
 			genAbout(""),
 		),
 	)
-
-	return 0
 }
 
 // genUsage generates usage info

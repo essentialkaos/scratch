@@ -22,7 +22,7 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/man"
 	"github.com/essentialkaos/ek/v12/usage/update"
 
-	"github.com/essentialkaos/{{SHORT_NAME}}/app/support"
+	"github.com/essentialkaos/{{SHORT_NAME}}/cli/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -52,8 +52,8 @@ const (
 // optMap contains information about all supported options
 var optMap = options.Map{
 	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:     {Type: options.BOOL},
+	OPT_VER:      {Type: options.BOOL},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -65,17 +65,14 @@ var useRawOutput = false
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Init is main function
-func Init(gitRev string, gomod []byte) {
+// Run is main utility function
+func Run(gitRev string, gomod []byte) {
 	preConfigureUI()
 
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		for _, err := range errs {
-			printError(err.Error())
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
 	}
 
@@ -85,17 +82,28 @@ func Init(gitRev string, gomod []byte) {
 	case options.Has(OPT_COMPLETION):
 		os.Exit(genCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		genMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		os.Exit(showAbout(gitRev))
+		showAbout(gitRev)
+		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		os.Exit(support.Show(APP, VER, gitRev, gomod))
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		os.Exit(showUsage())
+		showUsage()
+		os.Exit(0)
 	}
 
-	process(args)
+	err := process(args)
+
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
 }
+
+// ////////////////////////////////////////////////////////////////////////////////// //
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
@@ -129,9 +137,9 @@ func configureUI() {
 	}
 }
 
-// process starts processing
-func process(args options.Arguments) {
-	// DO YOUR STUFF HERE
+// process starts arguments processing
+func process(args options.Arguments) error {
+	return nil
 }
 
 // printError prints error message to console
@@ -152,24 +160,16 @@ func printWarn(f string, a ...interface{}) {
 	}
 }
 
-// printErrorAndExit print error mesage and exit with exit code 1
-func printErrorAndExit(f string, a ...interface{}) {
-	printError(f, a...)
-	os.Exit(1)
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // showUsage prints usage info
-func showUsage() int {
+func showUsage() {
 	genUsage().Render()
-	return 0
 }
 
 // showAbout prints info about version
-func showAbout(gitRev string) int {
+func showAbout(gitRev string) {
 	genAbout(gitRev).Render()
-	return 0
 }
 
 // genCompletion generates completion for different shells
@@ -191,15 +191,13 @@ func genCompletion() int {
 }
 
 // genMan generates man page
-func genMan() int {
+func genMan() {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
 			genAbout(""),
 		),
 	)
-
-	return 0
 }
 
 // genUsage generates usage info

@@ -10,7 +10,7 @@ package main
 import (
 	_ "embed"
 
-	CLI "github.com/essentialkaos/{{SHORT_NAME}}/app"
+	CLI "github.com/essentialkaos/{{SHORT_NAME}}/cli"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -24,5 +24,5 @@ var gitrev string
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func main() {
-	CLI.Init(gitrev, gomod)
+	CLI.Run(gitrev, gomod)
 }
