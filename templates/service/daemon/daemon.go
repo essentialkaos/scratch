@@ -82,10 +82,10 @@ func Run(gitRev string, gomod []byte) {
 
 	switch {
 	case options.GetB(OPT_VER):
-		showAbout(gitRev)
+		genAbout(gitRev).Print()
 		os.Exit(0)
 	case options.GetB(OPT_HELP):
-		showUsage()
+		genUsage().Print()
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
 		support.Print(APP, VER, gitRev, gomod)
@@ -264,18 +264,6 @@ func shutdown(code int) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
-
-// showUsage prints usage info
-func showUsage() int {
-	genUsage().Render()
-	return 0
-}
-
-// showAbout prints info about version
-func showAbout(gitRev string) int {
-	genAbout(gitRev).Render()
-	return 0
-}
 
 // genUsage generates usage info
 func genUsage() *usage.Info {
