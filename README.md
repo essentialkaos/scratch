@@ -66,11 +66,14 @@ Options
 
 Examples
 
+  scratch package
+  List files in template "package"
+
   scratch package .
-  Generate package blank files in current directory
+  Generate files based on tempalte "package" in current directory
 
   scratch service $GOPATH/src/github.com/essentialkaos/myapp
-  Generate service blank files in sources directory
+  Generate files based on tempalte "service" in given directory
 ```
 
 ### Contributing
