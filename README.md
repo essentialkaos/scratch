@@ -18,7 +18,7 @@
 
 #### From sources
 
-To install the `scratch` from sources, make sure you have a working Go 1.17+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To install the `scratch` from sources, make sure you have a working Go 1.19+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/scratch
@@ -66,11 +66,14 @@ Options
 
 Examples
 
+  scratch package
+  List files in template "package"
+
   scratch package .
-  Generate package blank files in current directory
+  Generate files based on tempalte "package" in current directory
 
   scratch service $GOPATH/src/github.com/essentialkaos/myapp
-  Generate service blank files in sources directory
+  Generate files based on tempalte "service" in given directory
 ```
 
 ### Contributing

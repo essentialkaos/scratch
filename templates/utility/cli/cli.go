@@ -2,7 +2,7 @@ package app
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -21,6 +21,8 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
 	"github.com/essentialkaos/ek/v12/usage/man"
 	"github.com/essentialkaos/ek/v12/usage/update"
+
+	"github.com/essentialkaos/{{SHORT_NAME}}/cli/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -40,6 +42,7 @@ const (
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
 
+	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
 	OPT_GENERATE_MAN = "generate-man"
 )
@@ -49,9 +52,10 @@ const (
 // optMap contains information about all supported options
 var optMap = options.Map{
 	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:     {Type: options.BOOL},
+	OPT_VER:      {Type: options.BOOL},
 
+	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
@@ -61,40 +65,45 @@ var useRawOutput = false
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Init is main function
-func Init() {
+// Run is main utility function
+func Run(gitRev string, gomod []byte) {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		for _, err := range errs {
-			printError(err.Error())
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
-	}
-
-	preConfigureUI()
-
-	if options.Has(OPT_COMPLETION) {
-		os.Exit(genCompletion())
-	}
-
-	if options.Has(OPT_GENERATE_MAN) {
-		os.Exit(genMan())
 	}
 
 	configureUI()
 
-	if options.GetB(OPT_VER) {
-		os.Exit(showAbout())
+	switch {
+	case options.Has(OPT_COMPLETION):
+		os.Exit(genCompletion())
+	case options.Has(OPT_GENERATE_MAN):
+		printMan()
+		os.Exit(0)
+	case options.GetB(OPT_VER):
+		genAbout(gitRev).Print()
+		os.Exit(0)
+	case options.GetB(OPT_VERB_VER):
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
+	case options.GetB(OPT_HELP) || len(args) == 0:
+		genUsage().Print()
+		os.Exit(0)
 	}
 
-	if options.GetB(OPT_HELP) || len(args) == 0 {
-		os.Exit(showUsage())
-	}
+	err := process(args)
 
-	process(args)
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
 }
+
+// ////////////////////////////////////////////////////////////////////////////////// //
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
@@ -128,9 +137,9 @@ func configureUI() {
 	}
 }
 
-// process starts processing
-func process(args options.Arguments) {
-	// DO YOUR STUFF HERE
+// process starts arguments processing
+func process(args options.Arguments) error {
+	return nil
 }
 
 // printError prints error message to console
@@ -151,28 +160,10 @@ func printWarn(f string, a ...interface{}) {
 	}
 }
 
-// printErrorAndExit print error mesage and exit with exit code 1
-func printErrorAndExit(f string, a ...interface{}) {
-	printError(f, a...)
-	os.Exit(1)
-}
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() int {
-	genUsage().Render()
-	return 0
-}
-
-// showAbout prints info about version
-func showAbout() int {
-	genAbout().Render()
-	return 0
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	info := genUsage()
 
 	switch options.GetS(OPT_COMPLETION) {
@@ -189,16 +180,14 @@ func genCompletion() int {
 	return 0
 }
 
-// genMan generates man page
-func genMan() int {
+// printMan prints man page
+func printMan() {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
-			genAbout(),
+			genAbout(""),
 		),
 	)
-
-	return 0
 }
 
 // genUsage generates usage info
@@ -213,8 +202,8 @@ func genUsage() *usage.Info {
 }
 
 // genAbout generates info about version
-func genAbout() *usage.About {
-	return &usage.About{
+func genAbout(gitRev string) *usage.About {
+	about := &usage.About{
 		App:           APP,
 		Version:       VER,
 		Desc:          DESC,
@@ -223,6 +212,12 @@ func genAbout() *usage.About {
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
 	}
+
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
+	}
+
+	return about
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

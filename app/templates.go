@@ -2,7 +2,7 @@ package app
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -68,7 +68,7 @@ type VariableInfo struct {
 var knownVars = &VariableInfoStore{
 	// Info contains info about all supported variables
 	Info: map[string]VariableInfo{
-		VAR_NAME:        {"Name", `^[a-zA-Z0-9\_\-]{2,32}$`, false},
+		VAR_NAME:        {"Name", `^[a-zA-Z0-9]+[a-zA-Z0-9\_\-\ ]{1,30}$`, false},
 		VAR_SHORT_NAME:  {"Short name (binary name or repository name)", `^[a-z0-9\_\-]{2,32}$`, false},
 		VAR_VERSION:     {"Version (in semver notation)", `^[0-9]+\.[0-9]*\.?[0-9]*$`, false},
 		VAR_DESC:        {"Description", `^.{16,128}$`, false},

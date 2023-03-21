@@ -2,7 +2,7 @@ package app
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -16,8 +16,11 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/lscolors"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/pluralize"
+	"github.com/essentialkaos/ek/v12/sortutil"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -31,7 +34,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.0.9"
+	VER  = "0.1.0"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -57,13 +60,12 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
-// useRawOutput is raw output flag (for cli command)
-var useRawOutput = false
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Init is main app func
 func Init() {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -74,29 +76,25 @@ func Init() {
 		os.Exit(1)
 	}
 
-	preConfigureUI()
-
-	if options.Has(OPT_COMPLETION) {
-		os.Exit(genCompletion())
-	}
-
-	if options.Has(OPT_GENERATE_MAN) {
-		os.Exit(genMan())
-	}
-
 	configureUI()
 
-	if options.GetB(OPT_VER) {
+	switch {
+	case options.Has(OPT_COMPLETION):
+		os.Exit(genCompletion())
+	case options.Has(OPT_GENERATE_MAN):
+		os.Exit(genMan())
+	case options.GetB(OPT_VER):
 		os.Exit(showAbout())
-	}
-
-	if options.GetB(OPT_HELP) {
+	case options.GetB(OPT_HELP):
 		os.Exit(showUsage())
 	}
 
-	if len(args) < 2 {
+	switch len(args) {
+	case 0:
 		listTemplates()
-	} else {
+	case 1:
+		listTemplateData(args.Get(0).String())
+	default:
 		generateApp(
 			args.Get(0).String(),
 			args.Get(1).Clean().String(),
@@ -121,7 +119,6 @@ func preConfigureUI() {
 
 	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
 		fmtc.DisableColors = true
-		useRawOutput = true
 	}
 
 	if os.Getenv("NO_COLOR") != "" {
@@ -201,6 +198,43 @@ func listTemplates() {
 				t.Name, pluralize.P("%d %s", len(t.Data), "file", "files"),
 			)
 		}
+	}
+
+	fmtc.NewLine()
+}
+
+// listTemplateData show list of files in template
+func listTemplateData(name string) {
+	if !hasTemplate(name) {
+		printErrorAndExit("There is no templates with name \"%s\"", name)
+	}
+
+	t, err := getTemplate(name)
+
+	if err != nil {
+		printErrorAndExit(err.Error())
+	}
+
+	sortutil.StringsNatural(t.Data)
+
+	fmtc.Printf(
+		"\n {s-}┌{!} {*}%s{!} {s-}(%s){!}\n {s-}│{!}\n",
+		t.Name, pluralize.P("%d %s", len(t.Data), "file", "files"),
+	)
+
+	for i, file := range t.Data {
+		if i+1 != len(t.Data) {
+			fmtc.Printf(" {s-}├─{!}")
+		} else {
+			fmtc.Printf(" {s-}└─{!}")
+		}
+
+		fileSize := fsutil.GetSize(path.Join(t.Path, file))
+		fmtc.Printf(
+			" %s {s-}(%s){!}\n",
+			lscolors.ColorizePath(file),
+			fmtutil.PrettySize(fileSize),
+		)
 	}
 
 	fmtc.NewLine()
@@ -356,8 +390,15 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 
-	info.AddExample("package .", "Generate package blank files in current directory")
-	info.AddExample("service $GOPATH/src/github.com/essentialkaos/myapp", "Generate service blank files in sources directory")
+	info.AddExample("package", "List files in template \"package\"")
+	info.AddExample(
+		"package .",
+		"Generate files based on tempalte \"package\" in current directory",
+	)
+	info.AddExample(
+		"service $GOPATH/src/github.com/essentialkaos/myapp",
+		"Generate files based on tempalte \"service\" in given directory",
+	)
 
 	return info
 }

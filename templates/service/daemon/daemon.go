@@ -2,25 +2,28 @@ package daemon
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/log"
 	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/pid"
 	"github.com/essentialkaos/ek/v12/signal"
 	"github.com/essentialkaos/ek/v12/usage"
 
 	knfv "github.com/essentialkaos/ek/v12/knf/validators"
 	knff "github.com/essentialkaos/ek/v12/knf/validators/fs"
+
+	"github.com/essentialkaos/{{SHORT_NAME}}/daemon/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -37,7 +40,9 @@ const (
 	OPT_CONFIG   = "c:config"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
-	OPT_VERSION  = "v:version"
+	OPT_VER      = "v:version"
+
+	OPT_VERB_VER = "vv:verbose-version"
 )
 
 // Configuration file properties
@@ -48,55 +53,87 @@ const (
 	LOG_LEVEL = "log:level"
 )
 
-// Pid file info
-const (
-	PID_DIR  = "/var/run/{{SHORT_NAME}}"
-	PID_FILE = "{{SHORT_NAME}}.pid"
-)
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // optMap contains information about all supported options
 var optMap = options.Map{
 	OPT_CONFIG:   {Value: "/etc/{{SHORT_NAME}}.knf"},
 	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VERSION:  {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:     {Type: options.BOOL},
+	OPT_VER:      {Type: options.BOOL},
+
+	OPT_VERB_VER: {Type: options.BOOL},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func Init() {
+// Run is main daemon function
+func Run(gitRev string, gomod []byte) {
+	preConfigureUI()
+
 	_, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		for _, err := range errs {
-			printError(err.Error())
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
 	}
 
 	configureUI()
 
-	if options.GetB(OPT_VERSION) {
-		os.Exit(showAbout())
+	switch {
+	case options.GetB(OPT_VER):
+		genAbout(gitRev).Print()
+		os.Exit(0)
+	case options.GetB(OPT_HELP):
+		genUsage().Print()
+		os.Exit(0)
+	case options.GetB(OPT_VERB_VER):
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
 	}
 
-	if options.GetB(OPT_HELP) {
-		os.Exit(showUsage())
-	}
+	err := prepare()
 
-	loadConfig()
-	validateConfig()
-	registerSignalHandlers()
-	setupLogger()
-	createPidFile()
+	if err != nil {
+		printError(err.Error())
+		os.Exit(1)
+	}
 
 	log.Aux(strings.Repeat("-", 80))
 	log.Aux("%s %s starting…", APP, VER)
 
-	start()
+	err = start()
+
+	if err != nil {
+		log.Crit(err.Error())
+		os.Exit(1)
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// preConfigureUI preconfigures UI based on information about user terminal
+func preConfigureUI() {
+	term := os.Getenv("TERM")
+
+	fmtc.DisableColors = true
+
+	if term != "" {
+		switch {
+		case strings.Contains(term, "xterm"),
+			strings.Contains(term, "color"),
+			term == "screen":
+			fmtc.DisableColors = false
+		}
+	}
+
+	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+		fmtc.DisableColors = true
+	}
+
+	if os.Getenv("NO_COLOR") != "" {
+		fmtc.DisableColors = true
+	}
 }
 
 // configureUI configures user interface
@@ -106,17 +143,33 @@ func configureUI() {
 	}
 }
 
-// loadConfig reads and parses configuration file
-func loadConfig() {
+// prepare prepares application to run
+func prepare() error {
 	err := knf.Global(options.GetS(OPT_CONFIG))
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
+
+	err = validateConfig()
+
+	if err != nil {
+		return err
+	}
+
+	registerSignalHandlers()
+
+	err = setupLogger()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // validateConfig validates configuration file values
-func validateConfig() {
+func validateConfig() error {
 	errs := knf.Validate([]*knf.Validator{
 		{LOG_DIR, knff.Perms, "DW"},
 		{LOG_DIR, knff.Perms, "DX"},
@@ -125,14 +178,10 @@ func validateConfig() {
 	})
 
 	if len(errs) != 0 {
-		printError("Error while configuration file validation:")
-
-		for _, err := range errs {
-			printError("  %v", err)
-		}
-
-		os.Exit(1)
+		return fmt.Errorf("Configuration file validation error: %w", errs[0])
 	}
+
+	return nil
 }
 
 // registerSignalHandlers registers signal handlers
@@ -144,34 +193,26 @@ func registerSignalHandlers() {
 	}.TrackAsync()
 }
 
-// setupLogger confugures logger subsystems
-func setupLogger() {
+// setupLogger confugures logger subsystem
+func setupLogger() error {
 	err := log.Set(knf.GetS(LOG_FILE), knf.GetM(LOG_PERMS, 644))
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	err = log.MinLevel(knf.GetS(LOG_LEVEL))
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
+
+	return nil
 }
 
-// createPidFile creates PID file
-func createPidFile() {
-	pid.Dir = PID_DIR
-
-	err := pid.Create(PID_FILE)
-
-	if err != nil {
-		printErrorAndExit(err.Error())
-	}
-}
-
-func start() {
-	// DO YOUR STUFF HERE
+// start starts daemon
+func start() error {
+	return nil
 }
 
 // intSignalHandler is INT signal handler
@@ -219,29 +260,26 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // shutdown stops deamon
 func shutdown(code int) {
-	pid.Remove(PID_FILE)
 	os.Exit(code)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() int {
+// genUsage generates usage info
+func genUsage() *usage.Info {
 	info := usage.NewInfo()
 
-	info.AddOption(OPT_CONFIG, "Path to configuration file", "config")
+	info.AddOption(OPT_CONFIG, "Path to configuration file", "file")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
-	info.AddOption(OPT_VERSION, "Show version")
+	info.AddOption(OPT_VER, "Show version")
 
-	info.Render()
-
-	return 0
+	return info
 }
 
-// showAbout prints info about version
-func showAbout() int {
-	usage := &usage.About{
+// genAbout generates info about version
+func genAbout(gitRev string) *usage.About {
+	about := &usage.About{
 		App:     APP,
 		Version: VER,
 		Desc:    DESC,
@@ -250,7 +288,9 @@ func showAbout() int {
 		License: "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 	}
 
-	usage.Render()
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
+	}
 
-	return 0
+	return about
 }
