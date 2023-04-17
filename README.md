@@ -70,10 +70,10 @@ Examples
   List files in template "package"
 
   scratch package .
-  Generate files based on tempalte "package" in current directory
+  Generate files based on template "package" in current directory
 
   scratch service $GOPATH/src/github.com/essentialkaos/myapp
-  Generate files based on tempalte "service" in given directory
+  Generate files based on template "service" in given directory
 ```
 
 ### Contributing

@@ -45,7 +45,7 @@ const (
 type Variables map[string]string // name → value
 
 type Template struct {
-	Name string // Name of tempate
+	Name string // Name of template
 	Path string // Path to directory with template data
 
 	Vars Variables // Variables

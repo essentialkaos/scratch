@@ -393,11 +393,11 @@ func genUsage() *usage.Info {
 	info.AddExample("package", "List files in template \"package\"")
 	info.AddExample(
 		"package .",
-		"Generate files based on tempalte \"package\" in current directory",
+		"Generate files based on template \"package\" in current directory",
 	)
 	info.AddExample(
 		"service $GOPATH/src/github.com/essentialkaos/myapp",
-		"Generate files based on tempalte \"service\" in given directory",
+		"Generate files based on template \"service\" in given directory",
 	)
 
 	return info
