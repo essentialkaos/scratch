@@ -193,7 +193,7 @@ func registerSignalHandlers() {
 	}.TrackAsync()
 }
 
-// setupLogger confugures logger subsystem
+// setupLogger configures logger subsystem
 func setupLogger() error {
 	err := log.Set(knf.GetS(LOG_FILE), knf.GetM(LOG_PERMS, 644))
 
@@ -252,13 +252,13 @@ func printWarn(f string, a ...interface{}) {
 	}
 }
 
-// printErrorAndExit print error mesage and exit with exit code 1
+// printErrorAndExit print error message and exit with exit code 1
 func printErrorAndExit(f string, a ...interface{}) {
 	printError(f, a...)
 	os.Exit(1)
 }
 
-// shutdown stops deamon
+// shutdown stops daemon
 func shutdown(code int) {
 	os.Exit(code)
 }

@@ -196,7 +196,7 @@ func validateConfig() error {
 	return nil
 }
 
-// setupLogger confugures logger subsystem
+// setupLogger configures logger subsystem
 func setupLogger() error {
 	err := log.Set(knf.GetS(LOG_FILE), knf.GetM(LOG_PERMS, 644))
 
