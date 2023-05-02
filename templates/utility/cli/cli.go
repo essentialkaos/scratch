@@ -80,7 +80,7 @@ func Run(gitRev string, gomod []byte) {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
 		printMan()
 		os.Exit(0)
