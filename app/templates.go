@@ -92,6 +92,7 @@ var knownVars = &VariableInfoStore{
 		VAR_DESC,
 		VAR_DESC_README,
 		VAR_CODEBEAT_UUID,
+		VAR_CODECLIMATE_ID,
 	},
 }
 
