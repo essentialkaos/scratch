@@ -53,8 +53,8 @@ const (
 
 var optMap = options.Map{
 	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:     {Type: options.BOOL},
+	OPT_VER:      {Type: options.MIXED},
 
 	OPT_COMPLETION:   {},
 	OPT_GENERATE_MAN: {Type: options.BOOL},
@@ -62,8 +62,8 @@ var optMap = options.Map{
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Init is main app func
-func Init() {
+// Run is main utility function
+func Run() {
 	preConfigureUI()
 
 	args, errs := options.Parse(optMap)
@@ -80,13 +80,16 @@ func Init() {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		printMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		os.Exit(showAbout())
+		genAbout().Print(options.GetS(OPT_VER))
+		os.Exit(0)
 	case options.GetB(OPT_HELP):
-		os.Exit(showUsage())
+		genUsage().Print()
+		os.Exit(0)
 	}
 
 	switch len(args) {
@@ -340,20 +343,8 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() int {
-	genUsage().Render()
-	return 0
-}
-
-// showAbout prints info about version
-func showAbout() int {
-	genAbout().Render()
-	return 0
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	info := genUsage()
 
 	switch options.GetS(OPT_COMPLETION) {
@@ -370,16 +361,9 @@ func genCompletion() int {
 	return 0
 }
 
-// genMan generates man page
-func genMan() int {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(),
-		),
-	)
-
-	return 0
+// printMan prints man page
+func printMan() {
+	fmt.Println(man.Generate(genUsage(), genAbout()))
 }
 
 // genUsage generates usage info
@@ -405,7 +389,7 @@ func genUsage() *usage.Info {
 
 // genAbout generates info about version
 func genAbout() *usage.About {
-	return &usage.About{
+	about := &usage.About{
 		App:           APP,
 		Version:       VER,
 		Desc:          DESC,
@@ -414,6 +398,8 @@ func genAbout() *usage.About {
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/" + APP, update.GitHubChecker},
 	}
+
+	return about
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
