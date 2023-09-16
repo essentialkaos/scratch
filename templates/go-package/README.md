@@ -20,7 +20,7 @@
 
 ### Installation
 
-Make sure you have a working Go 1.19+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+Make sure you have a working Go 1.20+ workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ````bash
 go get github.com/essentialkaos/go-{{SHORT_NAME}}

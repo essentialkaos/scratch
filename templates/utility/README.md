@@ -19,10 +19,20 @@
 
 #### From source
 
-To build the `{{SHORT_NAME}}` from scratch, make sure you have a working Go 1.19+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+To build the `{{SHORT_NAME}}` from scratch, make sure you have a working Go 1.20+ workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/{{SHORT_NAME}}@latest
+```
+
+#### Container Image
+
+The latest version of `{{SHORT_NAME}}` also available as container image on [GitHub Container Registry](https://kaos.sh/p/{{SHORT_NAME}}) and [Docker Hub](https://kaos.sh/d/{{SHORT_NAME}}):
+
+```bash
+podman run --rm -it ghcr.io/essentialkaos/{{SHORT_NAME}}:latest
+# or
+docker run --rm -it ghcr.io/essentialkaos/{{SHORT_NAME}}:latest
 ```
 
 #### Prebuilt binaries
