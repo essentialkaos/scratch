@@ -32,7 +32,8 @@ const (
 	VAR_DESC        = "DESC"
 	VAR_DESC_README = "DESC_README"
 
-	VAR_CODEBEAT_UUID = "CODEBEAT_UUID"
+	VAR_CODEBEAT_UUID  = "CODEBEAT_UUID"
+	VAR_CODECLIMATE_ID = "CODECLIMATE_ID"
 
 	VAR_SHORT_NAME_TITLE    = "SHORT_NAME_TITLE"
 	VAR_SHORT_NAME_LOWER    = "SHORT_NAME_LOWER"
@@ -45,7 +46,7 @@ const (
 type Variables map[string]string // name → value
 
 type Template struct {
-	Name string // Name of tempate
+	Name string // Name of template
 	Path string // Path to directory with template data
 
 	Vars Variables // Variables
@@ -74,7 +75,8 @@ var knownVars = &VariableInfoStore{
 		VAR_DESC:        {"Description", `^.{16,128}$`, false},
 		VAR_DESC_README: {"Description for README file (part after 'app is… ')", `^.{16,128}$`, false},
 
-		VAR_CODEBEAT_UUID: {"Codebeat project UUID", ``, false},
+		VAR_CODEBEAT_UUID:  {"Codebeat project UUID", ``, false},
+		VAR_CODECLIMATE_ID: {"Code climate project ID", ``, false},
 
 		VAR_SHORT_NAME_TITLE:    {"Short name in title case", ``, true},
 		VAR_SHORT_NAME_LOWER:    {"Short name in lower case", ``, true},
@@ -90,6 +92,7 @@ var knownVars = &VariableInfoStore{
 		VAR_DESC,
 		VAR_DESC_README,
 		VAR_CODEBEAT_UUID,
+		VAR_CODECLIMATE_ID,
 	},
 }
 

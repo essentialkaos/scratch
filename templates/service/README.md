@@ -1,9 +1,10 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/{{SHORT_NAME}}.svg"/></a></p>
 
 <p align="center">
-  <a href="https://kaos.sh/w/{{SHORT_NAME}}/ci"><img src="https://kaos.sh/w/{{SHORT_NAME}}/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/{{SHORT_NAME}}"><img src="https://kaos.sh/r/{{SHORT_NAME}}.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/l/{{SHORT_NAME}}"><img src="https://kaos.sh/l/{{CODECLIMATE_ID}}.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/b/{{SHORT_NAME}}"><img src="https://kaos.sh/b/{{CODEBEAT_UUID}}.svg" alt="Codebeat badge" /></a>
+  <a href="https://kaos.sh/w/{{SHORT_NAME}}/ci"><img src="https://kaos.sh/w/{{SHORT_NAME}}/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/{{SHORT_NAME}}/codeql"><img src="https://kaos.sh/w/{{SHORT_NAME}}/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
@@ -16,10 +17,10 @@
 
 ### Installation
 
-#### From [ESSENTIAL KAOS Public Repository](https://yum.kaos.st)
+#### From [ESSENTIAL KAOS Public Repository](https://pkgs.kaos.st)
 
 ```bash
-sudo yum install -y https://yum.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
+sudo yum install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
 sudo yum install {{SHORT_NAME}}
 ```
 

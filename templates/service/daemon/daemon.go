@@ -60,7 +60,7 @@ var optMap = options.Map{
 	OPT_CONFIG:   {Value: "/etc/{{SHORT_NAME}}.knf"},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL},
-	OPT_VER:      {Type: options.BOOL},
+	OPT_VER:      {Type: options.MIXED},
 
 	OPT_VERB_VER: {Type: options.BOOL},
 }
@@ -82,7 +82,7 @@ func Run(gitRev string, gomod []byte) {
 
 	switch {
 	case options.GetB(OPT_VER):
-		genAbout(gitRev).Print()
+		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_HELP):
 		genUsage().Print()
@@ -193,7 +193,7 @@ func registerSignalHandlers() {
 	}.TrackAsync()
 }
 
-// setupLogger confugures logger subsystem
+// setupLogger configures logger subsystem
 func setupLogger() error {
 	err := log.Set(knf.GetS(LOG_FILE), knf.GetM(LOG_PERMS, 644))
 
@@ -252,13 +252,13 @@ func printWarn(f string, a ...interface{}) {
 	}
 }
 
-// printErrorAndExit print error mesage and exit with exit code 1
+// printErrorAndExit print error message and exit with exit code 1
 func printErrorAndExit(f string, a ...interface{}) {
 	printError(f, a...)
 	os.Exit(1)
 }
 
-// shutdown stops deamon
+// shutdown stops daemon
 func shutdown(code int) {
 	os.Exit(code)
 }
