@@ -23,7 +23,7 @@ import (
 	knfv "github.com/essentialkaos/ek/v12/knf/validators"
 	knff "github.com/essentialkaos/ek/v12/knf/validators/fs"
 
-	"github.com/essentialkaos/{{SHORT_NAME}}/daemon/support"
+	"github.com/essentialkaos/{{SHORT_NAME}}/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -64,6 +64,9 @@ var optMap = options.Map{
 
 	OPT_VERB_VER: {Type: options.BOOL},
 }
+
+// color tags for app name and version
+var colorTagApp, colorTagVer string
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -116,6 +119,15 @@ func Run(gitRev string, gomod []byte) {
 func preConfigureUI() {
 	if !tty.IsTTY() {
 		fmtc.DisableColors = true
+	}
+
+	switch {
+	case fmtc.IsTrueColorSupported():
+		colorTagApp, colorTagVer = "{*}{#00AFFF}", "{#00AFFF}"
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{*}{#39}", "{#39}"
+	default:
+		colorTagApp, colorTagVer = "{*}{c}", "{c}"
 	}
 }
 
@@ -268,7 +280,13 @@ func genAbout(gitRev string) *usage.About {
 		Desc:    DESC,
 		Year:    2009,
 		Owner:   "ESSENTIAL KAOS",
-		License: "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+
+		AppNameColorTag: colorTagApp,
+		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
+
+		BugTracker: "https://github.com/essentialkaos/{{SHORT_NAME}}/issues",
+		License:    "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 	}
 
 	if gitRev != "" {
