@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/essentialkaos/ek/v12/errutil"
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/log"
@@ -112,12 +113,11 @@ func Run(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	err := prepare()
-
-	if err != nil {
-		printError(err.Error())
-		os.Exit(1)
-	}
+	err := errutil.Chain(
+		loadConfig,
+		validateConfig,
+		setupLogger,
+	)
 
 	err = process(args)
 
@@ -151,24 +151,12 @@ func configureUI() {
 	}
 }
 
-// prepare prepares application to run
-func prepare() error {
+// loadConfig loads configuration file
+func loadConfig() error {
 	err := knf.Global(options.GetS(OPT_CONFIG))
 
 	if err != nil {
-		return err
-	}
-
-	err = validateConfig()
-
-	if err != nil {
-		return err
-	}
-
-	err = setupLogger()
-
-	if err != nil {
-		return err
+		return fmt.Errorf("Can't load configuration: %w", err)
 	}
 
 	return nil
