@@ -2,7 +2,7 @@ package daemon
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -12,18 +12,19 @@ import (
 	"os"
 	"strings"
 
+	"github.com/essentialkaos/ek/v12/errutil"
 	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/knf"
 	"github.com/essentialkaos/ek/v12/log"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/signal"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 
 	knfv "github.com/essentialkaos/ek/v12/knf/validators"
 	knff "github.com/essentialkaos/ek/v12/knf/validators/fs"
 
-	"github.com/essentialkaos/{{SHORT_NAME}}/daemon/support"
+	"github.com/essentialkaos/{{SHORT_NAME}}/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -65,6 +66,9 @@ var optMap = options.Map{
 	OPT_VERB_VER: {Type: options.BOOL},
 }
 
+// color tags for app name and version
+var colorTagApp, colorTagVer string
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Run is main daemon function
@@ -92,12 +96,12 @@ func Run(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	err := prepare()
-
-	if err != nil {
-		printError(err.Error())
-		os.Exit(1)
-	}
+	err := errutil.Chain(
+		loadConfig,
+		validateConfig,
+		registerSignalHandlers,
+		setupLogger,
+	)
 
 	log.Aux(strings.Repeat("-", 80))
 	log.Aux("%s %s starting…", APP, VER)
@@ -114,25 +118,17 @@ func Run(gitRev string, gomod []byte) {
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
-	term := os.Getenv("TERM")
-
-	fmtc.DisableColors = true
-
-	if term != "" {
-		switch {
-		case strings.Contains(term, "xterm"),
-			strings.Contains(term, "color"),
-			term == "screen":
-			fmtc.DisableColors = false
-		}
-	}
-
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+	if !tty.IsTTY() {
 		fmtc.DisableColors = true
 	}
 
-	if os.Getenv("NO_COLOR") != "" {
-		fmtc.DisableColors = true
+	switch {
+	case fmtc.IsTrueColorSupported():
+		colorTagApp, colorTagVer = "{*}{#00AFFF}", "{#00AFFF}"
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{*}{#39}", "{#39}"
+	default:
+		colorTagApp, colorTagVer = "{*}{c}", "{c}"
 	}
 }
 
@@ -143,26 +139,12 @@ func configureUI() {
 	}
 }
 
-// prepare prepares application to run
-func prepare() error {
+// loadConfig loads configuration file
+func loadConfig() error {
 	err := knf.Global(options.GetS(OPT_CONFIG))
 
 	if err != nil {
-		return err
-	}
-
-	err = validateConfig()
-
-	if err != nil {
-		return err
-	}
-
-	registerSignalHandlers()
-
-	err = setupLogger()
-
-	if err != nil {
-		return err
+		return fmt.Errorf("Can't load configuration: %w", err)
 	}
 
 	return nil
@@ -185,12 +167,14 @@ func validateConfig() error {
 }
 
 // registerSignalHandlers registers signal handlers
-func registerSignalHandlers() {
+func registerSignalHandlers() error {
 	signal.Handlers{
 		signal.TERM: termSignalHandler,
 		signal.INT:  intSignalHandler,
 		signal.HUP:  hupSignalHandler,
 	}.TrackAsync()
+
+	return nil
 }
 
 // setupLogger configures logger subsystem
@@ -285,7 +269,13 @@ func genAbout(gitRev string) *usage.About {
 		Desc:    DESC,
 		Year:    2009,
 		Owner:   "ESSENTIAL KAOS",
-		License: "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+
+		AppNameColorTag: colorTagApp,
+		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
+
+		BugTracker: "https://github.com/essentialkaos/{{SHORT_NAME}}/issues",
+		License:    "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 	}
 
 	if gitRev != "" {

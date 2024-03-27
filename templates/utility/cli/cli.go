@@ -2,7 +2,7 @@ package app
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -10,11 +10,10 @@ package app
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
 	"github.com/essentialkaos/ek/v12/usage/completion/fish"
@@ -22,7 +21,7 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/man"
 	"github.com/essentialkaos/ek/v12/usage/update"
 
-	"github.com/essentialkaos/{{SHORT_NAME}}/cli/support"
+	"github.com/essentialkaos/{{SHORT_NAME}}/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -62,6 +61,9 @@ var optMap = options.Map{
 
 // useRawOutput is raw output flag (for cli command)
 var useRawOutput = false
+
+// color tags for app name and version
+var colorTagApp, colorTagVer string
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -107,26 +109,18 @@ func Run(gitRev string, gomod []byte) {
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
-	term := os.Getenv("TERM")
-
-	fmtc.DisableColors = true
-
-	if term != "" {
-		switch {
-		case strings.Contains(term, "xterm"),
-			strings.Contains(term, "color"),
-			term == "screen":
-			fmtc.DisableColors = false
-		}
-	}
-
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+	if !tty.IsTTY() {
 		fmtc.DisableColors = true
 		useRawOutput = true
 	}
 
-	if os.Getenv("NO_COLOR") != "" {
-		fmtc.DisableColors = true
+	switch {
+	case fmtc.IsTrueColorSupported():
+		colorTagApp, colorTagVer = "{*}{#00AFFF}", "{#00AFFF}"
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{*}{#39}", "{#39}"
+	default:
+		colorTagApp, colorTagVer = "{*}{c}", "{c}"
 	}
 }
 
@@ -168,11 +162,11 @@ func printCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "{{SHORT_NAME}}"))
+		fmt.Print(bash.Generate(info, "{{SHORT_NAME}}"))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "{{SHORT_NAME}}"))
+		fmt.Print(fish.Generate(info, "{{SHORT_NAME}}"))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "{{SHORT_NAME}}"))
+		fmt.Print(zsh.Generate(info, optMap, "{{SHORT_NAME}}"))
 	default:
 		return 1
 	}
@@ -182,12 +176,7 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info
@@ -204,12 +193,18 @@ func genUsage() *usage.Info {
 // genAbout generates info about version
 func genAbout(gitRev string) *usage.About {
 	about := &usage.About{
-		App:           APP,
-		Version:       VER,
-		Desc:          DESC,
-		Year:          2009,
-		Owner:         "ESSENTIAL KAOS",
+		App:     APP,
+		Version: VER,
+		Desc:    DESC,
+		Year:    2009,
+		Owner:   "ESSENTIAL KAOS",
+
+		AppNameColorTag: colorTagApp,
+		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
+
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+		BugTracker:    "https://github.com/essentialkaos/{{SHORT_NAME}}/issues",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
 	}
 

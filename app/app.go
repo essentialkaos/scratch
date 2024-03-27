@@ -2,7 +2,7 @@ package app
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
@@ -21,7 +20,11 @@ import (
 	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/pluralize"
 	"github.com/essentialkaos/ek/v12/sortutil"
+	"github.com/essentialkaos/ek/v12/support"
+	"github.com/essentialkaos/ek/v12/support/apps"
+	"github.com/essentialkaos/ek/v12/support/deps"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
 	"github.com/essentialkaos/ek/v12/usage/completion/fish"
@@ -34,7 +37,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.1.0"
+	VER  = "0.2.0"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -45,6 +48,7 @@ const (
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
 
+	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
 	OPT_GENERATE_MAN = "generate-man"
 )
@@ -56,14 +60,17 @@ var optMap = options.Map{
 	OPT_HELP:     {Type: options.BOOL},
 	OPT_VER:      {Type: options.MIXED},
 
+	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
+var colorTagApp, colorTagVer string
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Run is main utility function
-func Run() {
+func Run(gitRev string, gomod []byte) {
 	preConfigureUI()
 
 	args, errs := options.Parse(optMap)
@@ -85,7 +92,13 @@ func Run() {
 		printMan()
 		os.Exit(0)
 	case options.GetB(OPT_VER):
-		genAbout().Print(options.GetS(OPT_VER))
+		genAbout(gitRev).Print(options.GetS(OPT_VER))
+		os.Exit(0)
+	case options.GetB(OPT_VERB_VER):
+		support.Collect(APP, VER).WithRevision(gitRev).
+			WithDeps(deps.Extract(gomod)).
+			WithApps(apps.Golang()).Print()
+		os.Exit(0)
 		os.Exit(0)
 	case options.GetB(OPT_HELP):
 		genUsage().Print()
@@ -107,25 +120,17 @@ func Run() {
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
-	term := os.Getenv("TERM")
-
-	fmtc.DisableColors = true
-
-	if term != "" {
-		switch {
-		case strings.Contains(term, "xterm"),
-			strings.Contains(term, "color"),
-			term == "screen":
-			fmtc.DisableColors = false
-		}
-	}
-
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+	if !tty.IsTTY() {
 		fmtc.DisableColors = true
 	}
 
-	if os.Getenv("NO_COLOR") != "" {
-		fmtc.DisableColors = true
+	switch {
+	case fmtc.IsTrueColorSupported():
+		colorTagApp, colorTagVer = "{*}{&}{#F4BA33}", "{#F4BA33}"
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{*}{&}{#220}", "{#220}"
+	default:
+		colorTagApp, colorTagVer = "{*}{&}{y}", "{y}"
 	}
 }
 
@@ -363,7 +368,7 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(man.Generate(genUsage(), genAbout()))
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info
@@ -388,15 +393,25 @@ func genUsage() *usage.Info {
 }
 
 // genAbout generates info about version
-func genAbout() *usage.About {
+func genAbout(gitRev string) *usage.About {
 	about := &usage.About{
-		App:           APP,
-		Version:       VER,
-		Desc:          DESC,
-		Year:          2006,
-		Owner:         "ESSENTIAL KAOS",
+		App:     APP,
+		Version: VER,
+		Desc:    DESC,
+		Year:    2009,
+		Owner:   "ESSENTIAL KAOS",
+
+		AppNameColorTag: colorTagApp,
+		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
+
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
-		UpdateChecker: usage.UpdateChecker{"essentialkaos/" + APP, update.GitHubChecker},
+		BugTracker:    "https://github.com/essentialkaos/{{SHORT_NAME}}/issues",
+		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
+	}
+
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
 	}
 
 	return about
