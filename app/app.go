@@ -20,6 +20,9 @@ import (
 	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/pluralize"
 	"github.com/essentialkaos/ek/v12/sortutil"
+	"github.com/essentialkaos/ek/v12/support"
+	"github.com/essentialkaos/ek/v12/support/apps"
+	"github.com/essentialkaos/ek/v12/support/deps"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
@@ -28,8 +31,6 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
 	"github.com/essentialkaos/ek/v12/usage/man"
 	"github.com/essentialkaos/ek/v12/usage/update"
-
-	"github.com/essentialkaos/scratch/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -94,7 +95,10 @@ func Run(gitRev string, gomod []byte) {
 		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.Print(APP, VER, gitRev, gomod)
+		support.Collect(APP, VER).WithRevision(gitRev).
+			WithDeps(deps.Extract(gomod)).
+			WithApps(apps.Golang()).Print()
+		os.Exit(0)
 		os.Exit(0)
 	case options.GetB(OPT_HELP):
 		genUsage().Print()
