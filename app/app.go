@@ -95,9 +95,11 @@ func Run(gitRev string, gomod []byte) {
 		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.Collect(APP, VER).WithRevision(gitRev).
+		support.Collect(APP, VER).
+			WithRevision(gitRev).
 			WithDeps(deps.Extract(gomod)).
-			WithApps(apps.Golang()).Print()
+			WithApps(apps.Golang()).
+			Print()
 		os.Exit(0)
 		os.Exit(0)
 	case options.GetB(OPT_HELP):
@@ -406,8 +408,8 @@ func genAbout(gitRev string) *usage.About {
 		DescSeparator:   "{s}—{!}",
 
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
-		BugTracker:    "https://github.com/essentialkaos/{{SHORT_NAME}}/issues",
-		UpdateChecker: usage.UpdateChecker{"essentialkaos/{{SHORT_NAME}}", update.GitHubChecker},
+		BugTracker:    "https://github.com/essentialkaos/scratch/issues",
+		UpdateChecker: usage.UpdateChecker{"essentialkaos/scratch", update.GitHubChecker},
 	}
 
 	if gitRev != "" {
