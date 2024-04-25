@@ -1,9 +1,0 @@
-/var/log/{{SHORT_NAME}}/*.log {
-    weekly
-    rotate 8
-    copytruncate
-    delaycompress
-    compress
-    notifempty
-    missingok
-}

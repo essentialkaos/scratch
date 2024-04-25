@@ -23,6 +23,7 @@ import (
 	"github.com/essentialkaos/ek/v12/support"
 	"github.com/essentialkaos/ek/v12/support/apps"
 	"github.com/essentialkaos/ek/v12/support/deps"
+	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
@@ -37,7 +38,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.2.0"
+	VER  = "0.3.0"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -65,6 +66,10 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
+// templatesDir is path to directory with templates
+var templatesDir string
+
+// color tags for app name and version
 var colorTagApp, colorTagVer string
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -77,7 +82,7 @@ func Run(gitRev string, gomod []byte) {
 
 	if len(errs) != 0 {
 		for _, err := range errs {
-			printError(err.Error())
+			terminal.Error(err.Error())
 		}
 
 		os.Exit(1)
@@ -101,10 +106,13 @@ func Run(gitRev string, gomod []byte) {
 			WithApps(apps.Golang()).
 			Print()
 		os.Exit(0)
-		os.Exit(0)
 	case options.GetB(OPT_HELP):
 		genUsage().Print()
 		os.Exit(0)
+	}
+
+	if !findTemplatesDir() {
+		os.Exit(1)
 	}
 
 	switch len(args) {
@@ -143,6 +151,33 @@ func configureUI() {
 	}
 
 	terminal.Prompt = "› "
+}
+
+// findTemplatesDir tries to find directory with templates
+func findTemplatesDir() bool {
+	user, err := system.CurrentUser()
+
+	if err != nil {
+		terminal.Error("Can't get current user info: %v", err)
+		return false
+	}
+
+	templatesDir = path.Clean(path.Join(user.HomeDir, ".config/scratch"))
+
+	if !fsutil.IsExist(templatesDir) {
+		terminal.Warn("▲ Can't find directory with templates")
+		terminal.Warn("  Create directory ~/.config/scratch and add your templates to it")
+		return false
+	}
+
+	err = fsutil.ValidatePerms("DRX", templatesDir)
+
+	if err != nil {
+		terminal.Error(err.Error())
+		return false
+	}
+
+	return true
 }
 
 // generateApp generates app from template
@@ -276,7 +311,7 @@ func readVariablesValues(vars Variables) error {
 			}
 
 			if !knownVars.Info[v].IsValid(value) {
-				terminal.PrintWarnMessage("%q is not a valid value for this variable\n", value)
+				terminal.Warn("%q is not a valid value for this variable\n", value)
 				continue
 			}
 
@@ -337,14 +372,9 @@ func checkTargetDir(dir string) error {
 	return nil
 }
 
-// printError prints error message to console
-func printError(f string, a ...interface{}) {
-	fmtc.Fprintf(os.Stderr, "{r}"+f+"{!}\n", a...)
-}
-
 // printErrorAndExit prints error and exit with non-zero exit code
 func printErrorAndExit(f string, a ...interface{}) {
-	printError(f, a...)
+	terminal.Error(f, a...)
 	os.Exit(1)
 }
 
