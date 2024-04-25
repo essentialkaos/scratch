@@ -11,19 +11,18 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/path"
 	"github.com/essentialkaos/ek/v12/sortutil"
+	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/timeutil"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
-
-const SRC_DIR = "github.com/essentialkaos/scratch"
 
 const (
 	VAR_NAME        = "NAME"
@@ -155,7 +154,7 @@ func getTemplates() ([]*Template, error) {
 		template, err := getTemplate(templateName)
 
 		if err != nil {
-			return nil, fmt.Errorf("Problem with template \"%s\": %w", templateName, err)
+			return nil, fmt.Errorf("Problem with template %q: %w", templateName, err)
 		}
 
 		result = append(result, template)
@@ -183,14 +182,13 @@ func hasTemplate(templateName string) bool {
 
 // getTemplatesDir returns path to directory with templates
 func getTemplatesDir() (string, error) {
-	gopath := os.Getenv("GOPATH")
-	srcDir := gopath + "/src/" + SRC_DIR
+	user, err := system.CurrentUser()
 
-	if !fsutil.IsExist(srcDir) {
-		return "", fmt.Errorf("Can't find directory with scratch sources")
+	if err != nil {
+		return "", fmt.Errorf("Can't get current user info: %w", err)
 	}
 
-	templatesDir := srcDir + "/templates"
+	templatesDir := path.Join(user.HomeDir, ".config/scratch")
 
 	return templatesDir, fsutil.ValidatePerms("DRX", templatesDir)
 }
@@ -206,7 +204,7 @@ func getTemplate(templateName string) (*Template, error) {
 	templateDir := templatesDir + "/" + templateName
 
 	if !fsutil.IsExist(templateDir) {
-		return nil, fmt.Errorf("Can't find template with name \"%s\"", templateName)
+		return nil, fmt.Errorf("Can't find template with name %q", templateName)
 	}
 
 	files := fsutil.ListAllFiles(templateDir, false)
@@ -381,7 +379,7 @@ func validateVariables(vars Variables) error {
 		_, ok := knownVars.Info[v]
 
 		if !ok {
-			return fmt.Errorf("Template contains unknown variable \"%s\"", v)
+			return fmt.Errorf("Template contains unknown variable %q", v)
 		}
 	}
 
