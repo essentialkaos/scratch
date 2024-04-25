@@ -66,7 +66,7 @@ scratch --generate-man | sudo gzip > /usr/share/man/man1/scratch.1.gz
 ### Usage
 
 ```
-Usage: scratch {options} template dir
+Usage: scratch {options} template target-dir
 
 Options
 
