@@ -7,7 +7,7 @@
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -15,12 +15,23 @@
 
 ### Installation
 
+> [!IMPORTANT]
+> Before the first run you have to create a directory for your tempaltes. By default, all templates must be stored in the `~/.config/scratch` directory.
+
 #### From sources
 
 To install the `scratch` from sources, make sure you have a working Go 1.19+ workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
-go install github.com/essentialkaos/scratch
+go install github.com/essentialkaos/scratch@latest
+```
+
+#### Prebuilt binaries
+
+You can download prebuilt binaries for Linux from [EK Apps Repository](https://apps.kaos.st/scratch/latest):
+
+```bash
+bash <(curl -fsSL https://apps.kaos.st/get) scratch
 ```
 
 ### Command-line completion
