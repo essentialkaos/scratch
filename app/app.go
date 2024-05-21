@@ -25,6 +25,7 @@ import (
 	"github.com/essentialkaos/ek/v12/support/deps"
 	"github.com/essentialkaos/ek/v12/system"
 	"github.com/essentialkaos/ek/v12/terminal"
+	"github.com/essentialkaos/ek/v12/terminal/input"
 	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
@@ -38,7 +39,7 @@ import (
 
 const (
 	APP  = "scratch"
-	VER  = "0.3.0"
+	VER  = "0.3.1"
 	DESC = "Utility for generating blank files for apps and services"
 )
 
@@ -80,11 +81,9 @@ func Run(gitRev string, gomod []byte) {
 
 	args, errs := options.Parse(optMap)
 
-	if len(errs) != 0 {
-		for _, err := range errs {
-			terminal.Error(err.Error())
-		}
-
+	if !errs.IsEmpty() {
+		terminal.Error("Options parsing errors:")
+		terminal.Error(errs.String())
 		os.Exit(1)
 	}
 
@@ -150,7 +149,7 @@ func configureUI() {
 		fmtc.DisableColors = true
 	}
 
-	terminal.Prompt = "› "
+	input.Prompt = "› "
 }
 
 // findTemplatesDir tries to find directory with templates
@@ -275,11 +274,22 @@ func listTemplateData(name string) {
 		}
 
 		fileSize := fsutil.GetSize(path.Join(t.Path, file))
+
 		fmtc.Printf(
 			" %s {s-}(%s){!}\n",
 			lscolors.ColorizePath(file),
 			fmtutil.PrettySize(fileSize),
 		)
+	}
+
+	fmtc.NewLine()
+
+	for _, v := range knownVars.List {
+		_, ok := t.Vars[v]
+
+		if ok {
+			fmtc.Printf(" {s-}•{!} {s}%s — {&}%s{!}\n", v, knownVars.Info[v].Desc)
+		}
 	}
 
 	fmtc.NewLine()
@@ -302,7 +312,7 @@ func readVariablesValues(vars Variables) error {
 
 		for {
 			fmtc.Printf("{s-}[%d/%d]{!} {c}%s:{!}\n", curVar, totalVar, knownVars.Info[v].Desc)
-			value, err := terminal.ReadUI("", true)
+			value, err := input.Read("", true)
 
 			fmtc.NewLine()
 
@@ -340,7 +350,7 @@ func printVariablesInfo(vars Variables) {
 
 	fmtc.NewLine()
 
-	ok, err := terminal.ReadAnswer("Everything is ok?", "y")
+	ok, err := input.ReadAnswer("Everything is ok?", "y")
 
 	fmtc.NewLine()
 
