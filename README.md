@@ -65,26 +65,7 @@ scratch --generate-man | sudo gzip > /usr/share/man/man1/scratch.1.gz
 
 ### Usage
 
-```
-Usage: scratch {options} template target-dir
-
-Options
-
-  --no-color, -nc    Disable colors in output
-  --help, -h         Show this help message
-  --version, -v      Show version
-
-Examples
-
-  scratch package
-  List files in template "package"
-
-  scratch package .
-  Generate files based on template "package" in current directory
-
-  scratch service $GOPATH/src/github.com/essentialkaos/myapp
-  Generate files based on template "service" in given directory
-```
+<img src=".github/images/usage.svg" />
 
 ### Contributing
 
