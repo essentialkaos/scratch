@@ -1,10 +1,10 @@
-<p align="center"><a href="#readme"><img src="https://gh.kaos.st/scratch.svg"/></a></p>
+<p align="center"><a href="#readme"><img src=".github/images/card.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/w/scratch/ci"><img src="https://kaos.sh/w/scratch/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/b/scratch"><img src="https://kaos.sh/b/3b2ed0f2-1e39-4366-93f6-d955ca22ce3a.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/scratch/codeql"><img src="https://kaos.sh/w/scratch/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
-  <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
+  <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
 <p align="center"><a href="#installation">Installation</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
