@@ -15,11 +15,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/path"
-	"github.com/essentialkaos/ek/v12/sortutil"
-	"github.com/essentialkaos/ek/v12/system"
-	"github.com/essentialkaos/ek/v12/timeutil"
+	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v13/path"
+	"github.com/essentialkaos/ek/v13/sortutil"
+	"github.com/essentialkaos/ek/v13/system"
+	"github.com/essentialkaos/ek/v13/timeutil"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

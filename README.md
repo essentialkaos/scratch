@@ -2,7 +2,6 @@
 
 <p align="center">
   <a href="https://kaos.sh/w/scratch/ci"><img src="https://kaos.sh/w/scratch/ci.svg" alt="GitHub Actions CI Status" /></a>
-  <a href="https://kaos.sh/b/scratch"><img src="https://kaos.sh/b/3b2ed0f2-1e39-4366-93f6-d955ca22ce3a.svg" alt="Codebeat badge" /></a>
   <a href="https://kaos.sh/w/scratch/codeql"><img src="https://kaos.sh/w/scratch/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
@@ -16,11 +15,11 @@
 ### Installation
 
 > [!IMPORTANT]
-> Before the first run you have to create a directory for your tempaltes. By default, all templates must be stored in the `~/.config/scratch` directory.
+> Before the first run you have to create a directory for your templates. By default, all templates must be stored in the `~/.config/scratch` directory.
 
 #### From sources
 
-To install the `scratch` from sources, make sure you have a working Go 1.19+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+To install the `scratch` from sources, make sure you have a working [Go 1.22+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/scratch@latest
