@@ -15,7 +15,7 @@
 ### Installation
 
 > [!IMPORTANT]
-> Before the first run you have to create a directory for your tempaltes. By default, all templates must be stored in the `~/.config/scratch` directory.
+> Before the first run you have to create a directory for your templates. By default, all templates must be stored in the `~/.config/scratch` directory.
 
 #### From sources
 
