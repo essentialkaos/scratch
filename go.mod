@@ -1,6 +1,6 @@
 module github.com/essentialkaos/scratch
 
-go 1.18
+go 1.22.7
 
 require github.com/essentialkaos/ek/v12 v12.130.0
 
