@@ -150,6 +150,7 @@ func configureUI() {
 	}
 
 	input.Prompt = "› "
+	input.NewLine = true
 }
 
 // findTemplatesDir tries to find directory with templates
@@ -312,9 +313,7 @@ func readVariablesValues(vars Variables) error {
 
 		for {
 			fmtc.Printf("{s-}[%d/%d]{!} {c}%s:{!}\n", curVar, totalVar, knownVars.Info[v].Desc)
-			value, err := input.Read("", true)
-
-			fmtc.NewLine()
+			value, err := input.Read("", input.NotEmpty)
 
 			if err != nil {
 				os.Exit(1)
