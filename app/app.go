@@ -83,7 +83,7 @@ func Run(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.Error("- "))
+		terminal.Error(errs.Error(" - "))
 		os.Exit(1)
 	}
 
@@ -114,16 +114,23 @@ func Run(gitRev string, gomod []byte) {
 		os.Exit(1)
 	}
 
+	var err error
+
 	switch len(args) {
 	case 0:
-		listTemplates()
+		err = listTemplates()
 	case 1:
-		listTemplateData(args.Get(0).String())
+		err = listTemplateData(args.Get(0).String())
 	default:
-		generateApp(
+		err = generateApp(
 			args.Get(0).String(),
 			args.Get(1).Clean().String(),
 		)
+	}
+
+	if err != nil {
+		terminal.Error(err)
+		os.Exit(1)
 	}
 }
 
@@ -181,15 +188,15 @@ func findTemplatesDir() bool {
 }
 
 // generateApp generates app from template
-func generateApp(templateName, dir string) {
+func generateApp(templateName, dir string) error {
 	err := checkTargetDir(dir)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	if !hasTemplate(templateName) {
-		printErrorAndExit("There is no template with name %q", templateName)
+		return fmt.Errorf("There is no template with name %q", templateName)
 	}
 
 	dir, _ = filepath.Abs(dir)
@@ -197,87 +204,93 @@ func generateApp(templateName, dir string) {
 	template, err := getTemplate(templateName)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	err = readVariablesValues(template.Vars)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
-	printVariablesInfo(template.Vars)
+	if !printVariablesInfo(template.Vars) {
+		return nil
+	}
 
 	fmtc.Println("{*}Generating files…{!}\n")
 
 	err = copyTemplateData(template, dir)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	fmtc.Println("{g}Files successfully generated!{!}")
+
+	return nil
 }
 
 // listTemplates renders list of all available templates
-func listTemplates() {
+func listTemplates() error {
 	templates, err := getTemplates()
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	if len(templates) == 0 {
 		fmtc.Println("{y}No templates found{!}")
-		return
+		return nil
 	}
 
 	fmtc.NewLine()
 
 	for _, t := range templates {
 		if len(t.Data) == 0 {
-			fmtc.Printf(" {s}•{!} %s {s-}(empty){!}\n", t.Name)
+			fmtc.Printfn(" {s}•{!} %s {s-}(empty){!}", t.Name)
 		} else {
-			fmtc.Printf(
-				" {s}•{!} %s {s-}(%s){!}\n",
+			fmtc.Printfn(
+				" {s}•{!} %s {s-}(%s){!}",
 				t.Name, pluralize.P("%d %s", len(t.Data), "file", "files"),
 			)
 		}
 	}
 
 	fmtc.NewLine()
+
+	return nil
 }
 
 // listTemplateData show list of files in template
-func listTemplateData(name string) {
+func listTemplateData(name string) error {
 	if !hasTemplate(name) {
-		printErrorAndExit("There is no templates with name \"%s\"", name)
+		return fmt.Errorf("There is no templates with name %q", name)
 	}
 
 	t, err := getTemplate(name)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return err
 	}
 
 	sortutil.StringsNatural(t.Data)
 
-	fmtc.Printf(
-		"\n {s-}┌{!} {*}%s{!} {s-}(%s){!}\n {s-}│{!}\n",
+	fmtc.Printfn(
+		"\n {s-}┌{!} {*}%s{!} {s-}(%s){!}\n {s-}│{!}",
 		t.Name, pluralize.P("%d %s", len(t.Data), "file", "files"),
 	)
 
 	for i, file := range t.Data {
 		if i+1 != len(t.Data) {
-			fmtc.Printf(" {s-}├─{!}")
+			fmtc.Print(" {s-}├─{!}")
 		} else {
-			fmtc.Printf(" {s-}└─{!}")
+			fmtc.Print(" {s-}└─{!}")
 		}
 
 		fileSize := fsutil.GetSize(path.Join(t.Path, file))
 
-		fmtc.Printf(
-			" %s {s-}(%s){!}\n",
+		fmtc.Printfn(
+			" %s {s-}(%s){!}",
 			lscolors.ColorizePath(file),
 			fmtutil.PrettySize(fileSize),
 		)
@@ -289,11 +302,13 @@ func listTemplateData(name string) {
 		_, ok := t.Vars[v]
 
 		if ok {
-			fmtc.Printf(" {s-}•{!} {s}%s — {&}%s{!}\n", v, knownVars.Info[v].Desc)
+			fmtc.Printfn(" {s-}•{!} {s}%s — {&}%s{!}", v, knownVars.Info[v].Desc)
 		}
 	}
 
 	fmtc.NewLine()
+
+	return nil
 }
 
 // readVariablesValues reads values for variables from template
@@ -312,7 +327,7 @@ func readVariablesValues(vars Variables) error {
 		curVar++
 
 		for {
-			fmtc.Printf("{s-}[%d/%d]{!} {c}%s:{!}\n", curVar, totalVar, knownVars.Info[v].Desc)
+			fmtc.Printfn("{s-}[%d/%d]{!} {c}%s:{!}", curVar, totalVar, knownVars.Info[v].Desc)
 			value, err := input.Read("", input.NotEmpty)
 
 			if err != nil {
@@ -334,7 +349,7 @@ func readVariablesValues(vars Variables) error {
 }
 
 // printVariablesInfo prints defined variables
-func printVariablesInfo(vars Variables) {
+func printVariablesInfo(vars Variables) bool {
 	fmtutil.Separator(false)
 
 	for _, v := range knownVars.List {
@@ -342,7 +357,7 @@ func printVariablesInfo(vars Variables) {
 			continue
 		}
 
-		fmtc.Printf("  {*}%-16s{!} %s\n", v+":", vars[v])
+		fmtc.Printfn("  {*}%-16s{!} %s", v+":", vars[v])
 	}
 
 	fmtutil.Separator(false)
@@ -353,9 +368,7 @@ func printVariablesInfo(vars Variables) {
 
 	fmtc.NewLine()
 
-	if err != nil || !ok {
-		os.Exit(1)
-	}
+	return err == nil && ok
 }
 
 // checkTargetDir checks target dir
@@ -375,16 +388,10 @@ func checkTargetDir(dir string) error {
 	})
 
 	if len(objects) != 0 {
-		return fmt.Errorf("Target directory is not empty!")
+		return fmt.Errorf("Target directory is not empty")
 	}
 
 	return nil
-}
-
-// printErrorAndExit prints error and exit with non-zero exit code
-func printErrorAndExit(f string, a ...interface{}) {
-	terminal.Error(f, a...)
-	os.Exit(1)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -395,11 +402,11 @@ func printCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, APP))
+		fmt.Print(bash.Generate(info, APP))
 	case "fish":
-		fmt.Printf(fish.Generate(info, APP))
+		fmt.Print(fish.Generate(info, APP))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, APP))
+		fmt.Print(zsh.Generate(info, optMap, APP))
 	default:
 		return 1
 	}
