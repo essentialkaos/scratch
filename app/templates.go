@@ -33,6 +33,7 @@ const (
 
 	VAR_CODEBEAT_UUID  = "CODEBEAT_UUID"
 	VAR_CODECLIMATE_ID = "CODECLIMATE_ID"
+	VAR_K8N_NAMESPACE  = "K8N_NAMESPACE"
 
 	VAR_SHORT_NAME_TITLE    = "SHORT_NAME_TITLE"
 	VAR_SHORT_NAME_LOWER    = "SHORT_NAME_LOWER"
@@ -76,6 +77,7 @@ var knownVars = &VariableInfoStore{
 
 		VAR_CODEBEAT_UUID:  {"Codebeat project UUID", ``, false},
 		VAR_CODECLIMATE_ID: {"Code climate project ID", ``, false},
+		VAR_K8N_NAMESPACE:  {"Kubernetes namespace", `^[a-z0-9_\-]{2,}`, false},
 
 		VAR_SHORT_NAME_TITLE:    {"Short name in title case", ``, true},
 		VAR_SHORT_NAME_LOWER:    {"Short name in lower case", ``, true},
@@ -90,6 +92,7 @@ var knownVars = &VariableInfoStore{
 		VAR_VERSION,
 		VAR_DESC,
 		VAR_DESC_README,
+		VAR_K8N_NAMESPACE,
 		VAR_CODEBEAT_UUID,
 		VAR_CODECLIMATE_ID,
 	},
